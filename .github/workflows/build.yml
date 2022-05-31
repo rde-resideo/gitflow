@@ -15,7 +15,7 @@ jobs:
       id: extract_branch
     - name: Git Show Tag Details
       shell: bash
-      run: gi show ${GITHUB_REF##*/}
+      run: git show ${GITHUB_REF##*/}
     - name: Git Branch
       run: echo "Branch details  ${{ github.ref }} $GITHUB_REF $GITHUB_SHA ${{ steps.extract_branch.outputs.branch }} $GITHUB_HEAD_REF"
     - name: Create SAP Build
