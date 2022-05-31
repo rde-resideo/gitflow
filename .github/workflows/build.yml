@@ -11,7 +11,7 @@ jobs:
     - uses: actions/checkout@v3
     - name: Extract branch name
       shell: bash
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
       id: extract_branch
     - name: Git Branch
       run: echo "Branch details  ${{ github.ref }} $GITHUB_REF $GITHUB_SHA ${{ steps.extract_branch.outputs.branch }}"
