@@ -1,0 +1,14 @@
+name: Create SAP Build
+on:
+  push:
+    tags:        
+      - resideo_*.*
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Create SAP Build
+      run: echo "Good to deploy!"
