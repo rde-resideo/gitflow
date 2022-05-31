@@ -9,7 +9,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
-    
+    - name: Git Branch
+      run: echo "Branch details  ${{ github.ref }} and ${{ env.GIT_BRANCH }}"
     - name: Create SAP Build
-      if: ${{ env.GIT_BRANCH == 'develop' }}
+      if: endsWith(github.ref, 'develop') == true
       run: echo "Good to deploy! ${{ env.GIT_BRANCH }}"
