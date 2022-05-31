@@ -11,6 +11,10 @@ jobs:
     - uses: actions/checkout@v3
     - name: Git Branch
       run: echo "Branch details  ${{ github.ref }} $GITHUB_REF $GITHUB_SHA"
+    - name: Extract branch name
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      id: extract_branch
     - name: Create SAP Build
       if: endsWith(github.ref, 'develop') == true
       run: echo "Good to deploy! ${{ env.GIT_BRANCH }}"
