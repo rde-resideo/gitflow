@@ -18,7 +18,7 @@ jobs:
       run: |
         echo "The event name is ${{ github.event_name }}"
         #echo "$GITHUB_CONTEXT"
-    - name: Set Branch Variables :! develop
+    - name: Set Branch Variables (develop)
       if: github.ref_name == 'develop'
       run: |
             echo "AUTH0_AUDIENCE=https://resideo.auth0.com/api/v2/" >> $GITHUB_ENV
@@ -26,7 +26,7 @@ jobs:
             echo "AUTH0_DOMAIN=login.dev.resideo.com" >> $GITHUB_ENV
             echo "APP_ENVIRONMENT=develop" >> $GITHUB_ENV
             echo "CALLBACK_URL=https://eu2.qa.svcecomm.resideo.com" >> $GITHUB_ENV
-    - name: Set Branch Variables :! release
+    - name: Set Branch Variables (release)
       if: github.ref_name == 'release'
       run: |
             echo "AUTH0_AUDIENCE=https://resideo.auth0.com/api/v2/" >> $GITHUB_ENV
@@ -34,7 +34,7 @@ jobs:
             echo "AUTH0_DOMAIN=login.dev.resideo.com" >> $GITHUB_ENV
             echo "APP_ENVIRONMENT=develop" >> $GITHUB_ENV
             echo "CALLBACK_URL=https://eu2.staging.svcecomm.resideo.com" >> $GITHUB_ENV
-    - name: Set Branch Variables :! hotfix
+    - name: Set Branch Variables (hotfix)
       if: github.ref_name == 'hotfix'
       run: |
             echo "AUTH0_AUDIENCE=https://resideo.auth0.com/api/v2/" >> $GITHUB_ENV
@@ -42,7 +42,7 @@ jobs:
             echo "AUTH0_DOMAIN=login.dev.resideo.com" >> $GITHUB_ENV
             echo "APP_ENVIRONMENT=develop" >> $GITHUB_ENV
             echo "CALLBACK_URL=https://eu2.staging.svcecomm.resideo.com" >> $GITHUB_ENV
-    - name: Set Branch Variables :! master
+    - name: Set Branch Variables (master)
       if: github.ref_name == 'master'
       run: |
             echo "AUTH0_AUDIENCE=https://resideo.auth0.com/api/v2/" >> $GITHUB_ENV
@@ -50,4 +50,4 @@ jobs:
             echo "AUTH0_DOMAIN=login.dev.resideo.com" >> $GITHUB_ENV
             echo "APP_ENVIRONMENT=develop" >> $GITHUB_ENV
             echo "CALLBACK_URL=https://eu2.prd.svcecomm.resideo.com" >> $GITHUB_ENV
-    - run:  env:CALLBACK_URL
+    - run:  $env:CALLBACK_URL
