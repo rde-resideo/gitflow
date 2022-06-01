@@ -50,4 +50,4 @@ jobs:
             echo "AUTH0_DOMAIN=login.dev.resideo.com" >> $GITHUB_ENV
             echo "APP_ENVIRONMENT=develop" >> $GITHUB_ENV
             echo "CALLBACK_URL=https://eu2.prd.svcecomm.resideo.com" >> $GITHUB_ENV
-    - run:  echo ${env:CALLBACK_URL}
+    - run:  echo "CALLBACK_URL = $CALLBACK_URL"
