@@ -1,0 +1,54 @@
+name: BUILD_APP
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - master
+      - develop
+      - hotfix
+      - release
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    - name: Print GitHub context
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: |
+        echo "The event name is ${{ github.event_name }}"
+        #echo "$GITHUB_CONTEXT"
+    - name: Set Branch Variables (develop)
+      if: github.base_ref == 'develop'
+      run: |
+            echo "AUTH0_AUDIENCE=https://resideo.auth0.com/api/v2/" >> $GITHUB_ENV
+            echo "AUTH0_CLIENT_ID=TDvgR8AZXLx3UvH734fHagm8nNXdm8EY" >> $GITHUB_ENV
+            echo "AUTH0_DOMAIN=login.dev.resideo.com" >> $GITHUB_ENV
+            echo "APP_ENVIRONMENT=develop" >> $GITHUB_ENV
+            echo "CALLBACK_URL=https://eu2.qa.svcecomm.resideo.com" >> $GITHUB_ENV
+    - name: Set Branch Variables (release)
+      if: github.base_ref == 'release'
+      run: |
+            echo "AUTH0_AUDIENCE=https://resideo.auth0.com/api/v2/" >> $GITHUB_ENV
+            echo "AUTH0_CLIENT_ID=TDvgR8AZXLx3UvH734fHagm8nNXdm8EY" >> $GITHUB_ENV
+            echo "AUTH0_DOMAIN=login.dev.resideo.com" >> $GITHUB_ENV
+            echo "APP_ENVIRONMENT=develop" >> $GITHUB_ENV
+            echo "CALLBACK_URL=https://eu2.staging.svcecomm.resideo.com" >> $GITHUB_ENV
+    - name: Set Branch Variables (hotfix)
+      if: github.base_ref == 'hotfix'
+      run: |
+            echo "AUTH0_AUDIENCE=https://resideo.auth0.com/api/v2/" >> $GITHUB_ENV
+            echo "AUTH0_CLIENT_ID=TDvgR8AZXLx3UvH734fHagm8nNXdm8EY" >> $GITHUB_ENV
+            echo "AUTH0_DOMAIN=login.dev.resideo.com" >> $GITHUB_ENV
+            echo "APP_ENVIRONMENT=develop" >> $GITHUB_ENV
+            echo "CALLBACK_URL=https://eu2.staging.svcecomm.resideo.com" >> $GITHUB_ENV
+    - name: Set Branch Variables (master)
+      if: github.base_ref == 'master'
+      run: |
+            echo "AUTH0_AUDIENCE=https://resideo.auth0.com/api/v2/" >> $GITHUB_ENV
+            echo "AUTH0_CLIENT_ID=TDvgR8AZXLx3UvH734fHagm8nNXdm8EY" >> $GITHUB_ENV
+            echo "AUTH0_DOMAIN=login.dev.resideo.com" >> $GITHUB_ENV
+            echo "APP_ENVIRONMENT=develop" >> $GITHUB_ENV
+            echo "CALLBACK_URL=https://eu2.prd.svcecomm.resideo.com" >> $GITHUB_ENV
+    - run:  echo "CALLBACK_URL = $CALLBACK_URL"
