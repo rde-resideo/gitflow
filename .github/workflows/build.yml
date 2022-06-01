@@ -1,6 +1,7 @@
-name: Create SAP Build
+name: BUILD_APP
 on:
-  push:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
     branches:
       - master
       - develop
