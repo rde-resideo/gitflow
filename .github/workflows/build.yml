@@ -26,6 +26,12 @@ jobs:
             echo "AUTH0_DOMAIN=login.dev.resideo.com" >> $GITHUB_ENV
             echo "APP_ENVIRONMENT=develop" >> $GITHUB_ENV
             echo "CALLBACK_URL=https://eu2.svcecomm.resideo.com" >> $GITHUB_ENV
+          elseif $GITHUB_REF_NAME == "develop2"; then
+            echo "AUTH0_AUDIENCE=https://resideo.auth0.com/api/v2/" >> $GITHUB_ENV
+            echo "AUTH0_CLIENT_ID=TDvgR8AZXLx3UvH734fHagm8nNXdm8EY" >> $GITHUB_ENV
+            echo "AUTH0_DOMAIN=login.dev.resideo.com" >> $GITHUB_ENV
+            echo "APP_ENVIRONMENT=develop" >> $GITHUB_ENV
+            echo "CALLBACK_URL=https://eu2.svcecomm.resideo.com" >> $GITHUB_ENV
           else
             echo "AUTH0_AUDIENCE=https://resideo.auth0.com/api/v2/" >> $GITHUB_ENV
             echo "AUTH0_CLIENT_ID=TDvgR8AZXLx3UvH734fHagm8nNXdm8EY" >> $GITHUB_ENV
