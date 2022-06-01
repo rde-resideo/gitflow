@@ -19,7 +19,7 @@ jobs:
         echo "The event name is ${{ github.event_name }}"
         #echo "$GITHUB_CONTEXT"
     - name: Set Branch Variables :! develop
-      if: $GITHUB_REF_NAME == 'develop'
+      if: github.ref_name == 'develop'
       run: |
             echo "AUTH0_AUDIENCE=https://resideo.auth0.com/api/v2/" >> $GITHUB_ENV
             echo "AUTH0_CLIENT_ID=TDvgR8AZXLx3UvH734fHagm8nNXdm8EY" >> $GITHUB_ENV
@@ -27,7 +27,7 @@ jobs:
             echo "APP_ENVIRONMENT=develop" >> $GITHUB_ENV
             echo "CALLBACK_URL=https://eu2.qa.svcecomm.resideo.com" >> $GITHUB_ENV
     - name: Set Branch Variables :! release
-      if: $GITHUB_REF_NAME == 'release'
+      if: github.ref_name == 'release'
       run: |
             echo "AUTH0_AUDIENCE=https://resideo.auth0.com/api/v2/" >> $GITHUB_ENV
             echo "AUTH0_CLIENT_ID=TDvgR8AZXLx3UvH734fHagm8nNXdm8EY" >> $GITHUB_ENV
@@ -35,7 +35,7 @@ jobs:
             echo "APP_ENVIRONMENT=develop" >> $GITHUB_ENV
             echo "CALLBACK_URL=https://eu2.staging.svcecomm.resideo.com" >> $GITHUB_ENV
     - name: Set Branch Variables :! hotfix
-      if: $GITHUB_REF_NAME == 'hotfix'
+      if: github.ref_name == 'hotfix'
       run: |
             echo "AUTH0_AUDIENCE=https://resideo.auth0.com/api/v2/" >> $GITHUB_ENV
             echo "AUTH0_CLIENT_ID=TDvgR8AZXLx3UvH734fHagm8nNXdm8EY" >> $GITHUB_ENV
@@ -43,7 +43,7 @@ jobs:
             echo "APP_ENVIRONMENT=develop" >> $GITHUB_ENV
             echo "CALLBACK_URL=https://eu2.staging.svcecomm.resideo.com" >> $GITHUB_ENV
     - name: Set Branch Variables :! master
-      if: $GITHUB_REF_NAME == 'master'
+      if: github.ref_name == 'master'
       run: |
             echo "AUTH0_AUDIENCE=https://resideo.auth0.com/api/v2/" >> $GITHUB_ENV
             echo "AUTH0_CLIENT_ID=TDvgR8AZXLx3UvH734fHagm8nNXdm8EY" >> $GITHUB_ENV
