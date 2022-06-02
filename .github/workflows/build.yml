@@ -19,6 +19,9 @@ jobs:
       run: |
         echo "The event name is ${{ github.event_name }}"
         #echo "$GITHUB_CONTEXT"
+    - name: Set ENV Variables
+      run: ./.github/scripts/set-env-variables.ps1
+      shell: pwsh
     - name: Set Branch Variables (develop)
       if: github.base_ref == 'develop'
       run: |
