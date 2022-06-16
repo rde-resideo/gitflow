@@ -19,6 +19,8 @@ jobs:
         echo "CommitUrl : ${{ env.CommitUrl }}"
     - name: Get branch name
         id: tagbranch
+        env:
+            CommitUrl: "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/git/commits/$GITHUB_SHA"
         run: |
           echo "::set-output name=branchname::$(curl -s $CommitUrl | jq '.tag_name' | sed 's/\"//g')"
     - name: confirm release tag
