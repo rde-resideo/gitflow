@@ -10,20 +10,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Print GitHub context
-      env:
-        GITHUB_CONTEXT: ${{ toJson(github) }}
-        CommitUrl: "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/git/commits/$GITHUB_SHA"
+    - name: Find Branch Name
       run: |
-        echo "event name : ${{ github.event_name }}"
-        echo "CommitUrl : ${{ env.CommitUrl }}"
-    - name: Get branch name
-        id: tagbranch
-        env:
-            CommitUrl: "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/git/commits/$GITHUB_SHA"
-        run: |
-          echo "::set-output name=branchname::$(curl -s "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/git/commits/$GITHUB_SHA" | jq '.tag_name' | sed 's/\"//g')"
-    - name: confirm release tag
-        run: |
-          echo ${{ steps.tagbranch.outputs.branchname }}
+          ./.github/scripts/set-env-variables.ps1
+      shell: pwsh
         
