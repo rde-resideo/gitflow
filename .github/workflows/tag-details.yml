@@ -8,13 +8,11 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-    - name: "Call API 1"
-      uses: indiesdev/curl@v1.1
-      id: api
-      with:
-        url: https://api.github.com/repos/rde-resideo/gitflow/releases/latest
-        method: "GET"
-        log-response: true
-    - name: "Use response"
-        run: echo ${{ steps.api.outputs.response }}
-        
+    - uses: actions/checkout@v3
+    
+    - name: Get Branch Name for Tag
+        run: |
+          curl \
+              -H "Accept: application/vnd.github.v3+json" \ 
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              https://api.github.com/repos/OWNER/REPO/commits/COMMIT_SHA/branches-where-head
