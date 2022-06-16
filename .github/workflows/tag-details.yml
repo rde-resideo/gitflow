@@ -15,7 +15,7 @@ jobs:
         GITHUB_CONTEXT: ${{ toJson(github) }}
       run: |
         echo "1 : event name : ${{ github.event_name }}"
-        echo "2 : commits_url : ${{ github.repository.commits_url }}"
-        echo "3 : git_commits_url : ${{ github.repository.git_commits_url }}"
+        echo "2 : commits_url : ${{ env:GITHUB_CONTEXT.repository.commits_url }}"
+        echo "3 : git_commits_url : ${{ env:GITHUB_CONTEXT.repository.git_commits_url }}"
         echo "4 : sha : ${{ github.sha }}"
         #echo "$GITHUB_CONTEXT"
