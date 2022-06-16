@@ -22,9 +22,9 @@ jobs:
     - name: Proceed With Build
       if: ${{ steps.TagBranch.outputs.BranchName == 'master' || steps.TagBranch.outputs.BranchName == 'develop'}}
       run: |
-        echo "You are good to proceed with build!"
+        echo "Code commit branch is : ${{ steps.TagBranch.outputs.BranchName}}. You are good to proceed with build!"
         
     - name: Can Not Proceed With Build
-      if: ${{ steps.TagBranch.outputs.BranchName != 'master' || steps.TagBranch.outputs.BranchName != 'develop'}}
+      if: ${{ steps.TagBranch.outputs.BranchName != 'master' && steps.TagBranch.outputs.BranchName != 'develop'}}
       run: |
         echo "::warning:: $InvalidTagBranchMsg : ${{ steps.TagBranch.outputs.BranchName}}"
