@@ -3,6 +3,8 @@ on:
   push:
     tags:        
       - resideo_*.*
+env:
+  InvalidTagBranchMsg: "You can not proceed with this build. Please create your Tag with master or develop branch to Proceed with Build!"
 jobs:
   Build:
 
@@ -21,7 +23,7 @@ jobs:
       run: |
         echo "You are good to proceed with build!"
         
-    - name: Do not Proceed with Build
+    - name: Cancel the Build
       if: ${{ steps.TagBranch.outputs.BranchName != 'master' || steps.TagBranch.outputs.BranchName != 'develop'}}
       run: |
-        echo "::warning:: You can not proceed with this build. Please create your Tag with master or develop branch to Proceed with Build!"
+        echo "::warning:: ${{ env.InvalidTagBranchMsg }}"
