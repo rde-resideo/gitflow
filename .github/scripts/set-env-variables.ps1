@@ -20,7 +20,7 @@ try
 
     Write-Host $env:COMPUTERNAME
 
-    Set-ActionVariable BRANCH_NAME "$env:COMPUTERNAME_true"
+    #Set-ActionVariable BRANCH_NAME "$env:COMPUTERNAME_true"
 
     <#
     $git_tag=''
