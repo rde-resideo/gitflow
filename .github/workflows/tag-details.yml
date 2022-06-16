@@ -20,7 +20,7 @@ jobs:
     - name: Get branch name
         id: tagbranch
         run: |
-          echo "::set-output name=branchname::$(curl -s ${{ env.CommitUrl }} | jq '.tag_name' | sed 's/\"//g')"
+          echo "::set-output name=branchname::$(curl -s env.CommitUrl | jq '.tag_name' | sed 's/\"//g')"
     - name: confirm release tag
         run: |
           echo ${{ steps.tagbranch.outputs.branchname }}
