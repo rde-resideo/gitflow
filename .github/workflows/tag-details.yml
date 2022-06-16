@@ -13,6 +13,8 @@ jobs:
     - name: Get Branch Name for Commit
       id: TagBranch
       run: |
+         echo '::set-output name=action_echo::enabled'
+         echo '::echo::off'
          echo "::set-output name=BranchName::$(curl -s "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/branches-where-head" | jq -r '.[].name')"
     - name: Proceed with Build
       if: ${{ steps.TagBranch.outputs.BranchName == 'master' || steps.TagBranch.outputs.BranchName == 'develop'}}
