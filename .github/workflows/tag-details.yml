@@ -22,4 +22,4 @@ jobs:
     - name: Do not Proceed with Build
       if: ${{ steps.TagBranch.outputs.BranchName != 'master' || steps.TagBranch.outputs.BranchName != 'develop'}}
       run: |
-        echo "You can not proceed with this build. Please create your Tag with master or develop branch to Proceed with Build!"
+        echo "::warning:: You can not proceed with this build. Please create your Tag with master or develop branch to Proceed with Build!"
