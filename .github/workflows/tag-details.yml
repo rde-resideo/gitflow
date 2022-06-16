@@ -10,10 +10,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Get branch name
-      id: tagbranch
+    - name: Get Branch Name for Commit 
+      id: TagBranch
       run: |
-         echo "::set-output name=branchname::$(curl -s "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/branches-where-head" | jq -r '.[].name')"
+         echo "::set-output name=BranchName::$(curl -s "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/branches-where-head" | jq -r '.[].name')"
     - name: confirm release tag
       run: |
-        echo ${{ steps.tagbranch.outputs.branchname }}
+        echo ${{ steps.TagBranch.outputs.BranchName }}
