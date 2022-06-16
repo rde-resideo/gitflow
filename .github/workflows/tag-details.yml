@@ -12,7 +12,6 @@ jobs:
     
     - name: Set Variables
       run: |
-        echo "Working Path: $($Env:GITHUB_WORKSPACE)"
         $branchName = $Env:GITHUB_REF -replace "refs/heads/", ""
         echo "Branch: ${branchName}"
         echo "CURRENT_BRANCH=${branchName}" >> $GITHUB_ENV
