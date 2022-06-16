@@ -13,7 +13,7 @@ jobs:
     - name: Get branch name
       id: tagbranch
       run: |
-         echo "::set-output name=branchname::$(curl -s "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/branches-where-head" | jq '.')"
+         echo "::set-output name=branchname::$(curl -s "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/branches-where-head" | jq '.name')"
     - name: confirm release tag
       run: |
         echo ${{ steps.tagbranch.outputs.branchname }}
