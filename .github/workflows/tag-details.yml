@@ -26,4 +26,4 @@ jobs:
     - name: Cancel the Build
       if: ${{ steps.TagBranch.outputs.BranchName != 'master' || steps.TagBranch.outputs.BranchName != 'develop'}}
       run: |
-        echo "::warning:: ${{ env.InvalidTagBranchMsg }}"
+        echo "::warning:: $InvalidTagBranchMsg"
