@@ -11,8 +11,8 @@ jobs:
     - uses: actions/checkout@v3
     
     - name: Get Branch Name for Tag
-        run: |
+      run: |
           curl \
-              -H "Accept: application/vnd.github.v3+json" \ 
-              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              https://api.github.com/repos/OWNER/REPO/commits/COMMIT_SHA/branches-where-head
+          -H "Accept: application/vnd.github.v3+json" \ 
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          https://api.github.com/repos/OWNER/REPO/commits/COMMIT_SHA/branches-where-head
