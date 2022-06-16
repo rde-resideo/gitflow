@@ -19,4 +19,6 @@ jobs:
         echo "2 : commits_url : $commits_url"
         echo "3 : git_commits_url : ${{ github.repository.git_commits_url }}"
         echo "4 : sha : ${{ github.sha }} - ${{ github.repository.commits_url }}"
+        echo "5 : Context : $GITHUB_CONTEXT.ref"
+        echo "6 : Context : ${{ env.GITHUB_CONTEXT.ref }}"
         
