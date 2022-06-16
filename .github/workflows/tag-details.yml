@@ -13,12 +13,8 @@ jobs:
     - name: Print GitHub context
       env:
         GITHUB_CONTEXT: ${{ toJson(github) }}
-        commits_url: ${{toJson(github.repository.commits_url) }}
+        commits_url: $GITHUB_API_URL/repos/$GITHUB_REPOSITORY/git/commits/$GITHUB_SHA
       run: |
         echo "1 : event name : ${{ github.event_name }}"
         echo "2 : commits_url : $commits_url"
-        echo "3 : git_commits_url : ${{ github.repository.git_commits_url }}"
-        echo "4 : sha : ${{ github.sha }} - ${{ github.repository.commits_url }}"
-        echo "5 : Context : $GITHUB_CONTEXT.ref"
-        echo "6 : Context : ${{ env.GITHUB_CONTEXT.ref }}"
         
