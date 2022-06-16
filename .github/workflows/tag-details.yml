@@ -27,4 +27,4 @@ jobs:
     - name: Can Not Proceed With Build
       if: ${{ steps.TagBranch.outputs.BranchName != 'master' || steps.TagBranch.outputs.BranchName != 'develop'}}
       run: |
-        echo "::warning:: $InvalidTagBranchMsg"
+        echo "::warning:: $InvalidTagBranchMsg : ${{ steps.TagBranch.outputs.BranchName}}"
