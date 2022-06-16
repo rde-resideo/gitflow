@@ -4,7 +4,7 @@ on:
     tags:        
       - resideo_*.*
 env:
-  InvalidTagBranchMsg: "Please create your Tag with master or develop branch to Proceed with Build! develop"
+  InvalidTagBranchMsg: "Please create your Tag with master or develop branch to Proceed with Build! dev"
 jobs:
   Build:
 
