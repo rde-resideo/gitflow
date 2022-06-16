@@ -13,7 +13,7 @@ jobs:
     - name: get latest release with tag
         id: latestrelease
         run: |
-          echo "::set-output name=releasetag::$(curl -s https://github.com/rde-resideo/gitflow/commit/90d4572c64e5d740471b5855c648de284d24734f"
+          echo "::set-output name=releasetag::$(curl -s https://github.com/rde-resideo/gitflow/commit/90d4572c64e5d740471b5855c648de284d24734f )"
     - name: confirm release tag
         run: |
           echo ${{ steps.latestrelease.outputs.releasetag }}
