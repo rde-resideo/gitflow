@@ -10,12 +10,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: "Call API 1"
-        uses: indiesdev/curl@v1.1
-        id: api
-        with:
-          url: https://api.github.com/repos/rde-resideo/gitflow/releases/latest
-          method: "GET"
-          log-response: true
+      uses: indiesdev/curl@v1.1
+      id: api
+      with:
+        url: https://api.github.com/repos/rde-resideo/gitflow/releases/latest
+        method: "GET"
+        log-response: true
     - name: "Use response"
         run: echo ${{ steps.api.outputs.response }}
         
