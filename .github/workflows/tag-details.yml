@@ -4,7 +4,8 @@ on:
     tags:        
       - resideo_*.*
 env:
-  InvalidTagBranchMsg: "Please create your Tag with master or develop branch to Proceed with Build! dev"
+  ValidTagBranchMsg: "You are good to proceed with build! Code commit branch is : ${{ steps.TagBranch.outputs.BranchName}}."
+  InvalidTagBranchMsg: "Please create your Tag with master or develop branch to Proceed with Build! : ${{ steps.TagBranch.outputs.BranchName}}"
 jobs:
   Build:
 
@@ -22,9 +23,9 @@ jobs:
     - name: Proceed With Build
       if: ${{ steps.TagBranch.outputs.BranchName == 'master' || steps.TagBranch.outputs.BranchName == 'develop'}}
       run: |
-        echo "Code commit branch is : ${{ steps.TagBranch.outputs.BranchName}}. You are good to proceed with build!"
+        echo "$ValidTagBranchMsg"
         
     - name: Can Not Proceed With Build
       if: ${{ steps.TagBranch.outputs.BranchName != 'master' && steps.TagBranch.outputs.BranchName != 'develop'}}
       run: |
-        echo "::warning:: $InvalidTagBranchMsg : ${{ steps.TagBranch.outputs.BranchName}}"
+        echo "::warning:: $InvalidTagBranchMsg"
