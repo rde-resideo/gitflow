@@ -12,7 +12,7 @@ jobs:
     
     - name: Set Variables
       run: |
-        echo "TagBranch=$(git branch --contains "$GITHUB_SHA")" >> $GITHUB_ENV
+        echo "TagBranch=$(git branch --contains 1e93c59f1fadcf77509d823d6d8b4951660959a8)" >> $GITHUB_ENV
         echo "TagBranch ${TagBranch}"
 
     - name: Output Variables
