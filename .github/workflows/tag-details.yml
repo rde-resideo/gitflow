@@ -9,12 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
-    - name: get latest release with tag
-        id: latestrelease
-        run: |
-          echo "::set-output name=releasetag::$(curl -s https://api.github.com/repos/rde-resideo/gitflow/releases/latest | jq '.tag_name' | sed 's/\"//g')"
-    - name: confirm release tag
-        run: |
-          echo ${{ steps.latestrelease.outputs.releasetag }}
+    - name: "Call API 1"
+        uses: indiesdev/curl@v1.1
+        id: api
+        with:
+          url: https://api.github.com/repos/rde-resideo/gitflow/releases/latest
+          method: "GET"
+          log-response: true
+    - name: "Use response"
+        run: echo ${{ steps.api.outputs.response }}
         
