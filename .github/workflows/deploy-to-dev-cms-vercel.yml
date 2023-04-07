@@ -19,7 +19,9 @@ on:
         description: Deploy To Vercel
         required: true
       Environment:
+        description: 'Environment To Run Against'
         type: environment
+        required: true
 
 jobs:
   greet:
@@ -33,7 +35,7 @@ jobs:
 
     steps:
     - name: Print User Inputs
-      run: echo "$UserName - $Message - $DeployToCMS - $DeployToVercel - $DeployEnvironment"
+      run: echo "$UserName - $Message - $DeployToCMS - $DeployToVercel - $DeployEnvironment - ${{ vars.VAR1 }}"
 
     - name: DeployToCMS
       if: ${{ github.event.inputs.DeployToCMS  == 'true'}}
