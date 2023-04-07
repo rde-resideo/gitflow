@@ -34,7 +34,7 @@ jobs:
     #if: ${{ github.event.inputs.Environment == 'master' }}
     runs-on: ubuntu-latest
     environment:
-      name: ${{ env.DeployEnvironment }}
+      name: ${{ $DeployEnvironment }}
 
     steps:
     - name: Print User Inputs
