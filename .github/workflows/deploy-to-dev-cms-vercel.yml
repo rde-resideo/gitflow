@@ -24,40 +24,12 @@ on:
         required: true
 
 jobs:
-  Deploy_To_Production:
-    name: "Deploy to Production environment"
+  Deploy:
+    name: "Deploy to ${{ github.event.inputs.Environment }} environment"
     if: ${{ github.event.inputs.Environment == 'master' }}
     runs-on: ubuntu-latest
     environment:
-      name: master
-    env:
-      UserName: ${{ github.event.inputs.Name }}
-      Message: ${{ github.event.inputs.Message }}
-      DeployToCMS: ${{ github.event.inputs.DeployToCMS }}
-      DeployToVercel: ${{ github.event.inputs.DeployToVercel }}
-      DeployEnvironment: ${{ github.event.inputs.Environment }}
-
-    steps:
-    - name: Print User Inputs
-      run: echo "$UserName - $Message - $DeployToCMS - $DeployToVercel - $DeployEnvironment - ${{ vars.VAR1 }}"
-
-    - name: Output Inputs
-      run: echo "${{ toJSON(env) }}"
-        
-    - name: DeployToCMS
-      if: ${{ github.event.inputs.DeployToCMS  == 'true'}}
-      run: echo "${{ github.event.inputs.Message }}"
-      
-    - name: DeployToVercel
-      if: ${{ github.event.inputs.DeployToVercel  == 'true'}}
-      run: echo "${{ github.event.inputs.Message }}"
-
-  Deploy_To_Develop:
-    name: "Deploy to Develop environment"
-    if: ${{ github.event.inputs.Environment == 'develop' }}
-    runs-on: ubuntu-latest
-    environment:
-      name: develop
+      name: ${{ github.event.inputs.Environment }}
     env:
       UserName: ${{ github.event.inputs.Name }}
       Message: ${{ github.event.inputs.Message }}
