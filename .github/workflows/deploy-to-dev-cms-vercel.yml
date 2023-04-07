@@ -26,7 +26,6 @@ on:
 jobs:
   greet:
     runs-on: ubuntu-latest
-    environment: ${{ env.DeployEnvironment }}
     env:
       UserName: ${{ github.event.inputs.Name }}
       Message: ${{ github.event.inputs.Message }}
@@ -38,6 +37,9 @@ jobs:
     - name: Print User Inputs
       run: echo "$UserName - $Message - $DeployToCMS - $DeployToVercel - $DeployEnvironment - ${{ vars.VAR1 }}"
 
+    - name: Output Inputs
+      run: echo "${{ toJSON(env) }}"
+        
     - name: DeployToCMS
       if: ${{ github.event.inputs.DeployToCMS  == 'true'}}
       run: echo "${{ github.event.inputs.Message }}"
