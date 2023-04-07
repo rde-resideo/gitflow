@@ -26,7 +26,7 @@ on:
 jobs:
   greet:
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.Environment }}
+    environment: ${{ env.DeployEnvironment }}
     env:
       UserName: ${{ github.event.inputs.Name }}
       Message: ${{ github.event.inputs.Message }}
