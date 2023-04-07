@@ -27,7 +27,7 @@ jobs:
   greet:
     runs-on: ubuntu-latest
     environment:
-      name: develop
+      name: master
     env:
       UserName: ${{ github.event.inputs.Name }}
       Message: ${{ github.event.inputs.Message }}
