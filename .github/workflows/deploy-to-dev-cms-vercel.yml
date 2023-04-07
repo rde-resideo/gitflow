@@ -23,8 +23,6 @@ on:
 
 jobs:
   greet:
-    environment:
-      name: develop
     runs-on: ubuntu-latest
 
     steps:
