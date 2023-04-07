@@ -2,12 +2,12 @@ name: deploy-to-dev-cms-vercel
 on:
   workflow_dispatch:
     inputs:
-      Name:
+      Environment:
         type: choice
-        description: Whom to greet
+        description: Environment To Run Against
         options: 
-        - User1
-        - User2
+        - develop
+        - master
       Message:
         required: true
       DeployToCMS:
@@ -18,12 +18,12 @@ on:
         type: boolean
         description: Deploy To Vercel
         required: true
-      Environment:
-        description: 'Environment To Run Against'
-        type: environment
-        required: true
+      #Environment:
+      #  description: 'Environment To Run Against'
+      #  type: environment
+      #  required: true
 env:
-  UserName: ${{ github.event.inputs.Name }}
+  UserName: ${{ github.event.inputs.Message }}
   Message: ${{ github.event.inputs.Message }}
   DeployToCMS: ${{ github.event.inputs.DeployToCMS }}
   DeployToVercel: ${{ github.event.inputs.DeployToVercel }}
