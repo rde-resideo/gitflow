@@ -26,7 +26,7 @@ on:
 jobs:
   Deploy:
     name: "Deploy to ${{ github.event.inputs.Environment }} environment"
-    if: ${{ github.event.inputs.Environment == 'master' }}
+    #if: ${{ github.event.inputs.Environment == 'master' }}
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.event.inputs.Environment }}
