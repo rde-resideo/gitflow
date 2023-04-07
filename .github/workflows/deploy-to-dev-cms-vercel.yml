@@ -24,9 +24,9 @@ on:
 jobs:
   greet:
     environment:
-      name: "${{ github.event.inputs.Environment }}"
+      name: develop
     runs-on: ubuntu-latest
 
     steps:
     - name: Send greeting
-      run: echo "${{ env.VAR1 }} ${{ github.event.inputs.Message }} ${{ fromJSON('["", ""]')[github.event.inputs.DeployToCMS] }} ${{ github.event.inputs.Name }}"
+      run: echo "${{ env.VAR1 }}- ${{ github.event.inputs.Environment }}- ${{ github.event.inputs.Message }} ${{ fromJSON('["", ""]')[github.event.inputs.DeployToCMS] }} ${{ github.event.inputs.Name }}"
