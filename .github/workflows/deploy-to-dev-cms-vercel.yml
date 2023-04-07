@@ -27,4 +27,4 @@ jobs:
 
     steps:
     - name: Send greeting
-      run: echo "${{ env.VAR1 }}- ${{ github.event.inputs.Message }} ${{ fromJSON('["", ""]')[github.event.inputs.DeployToCMS] }} ${{ github.event.inputs.Name }}"
+      run: echo "${{ secrets.VAR1 }}- ${{ github.event.inputs.Message }} ${{ fromJSON('["", ""]')[github.event.inputs.DeployToCMS] }} ${{ github.event.inputs.Name }}"
