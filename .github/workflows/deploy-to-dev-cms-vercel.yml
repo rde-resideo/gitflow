@@ -30,8 +30,8 @@ jobs:
     steps:
     - name: DeployToCMS
       if: ${{ github.event.inputs.DeployToCMS  == 'true'}}
-      run: echo "${{ github.event.inputs.Message }} - $DeployToCMS"
+      run: echo "${{ github.event.inputs.Message }} - $DeployToCMS - $DeployToVercel"
       
     - name: DeployToVercel
       if: ${{ github.event.inputs.DeployToVercel  == 'true'}}
-      run: echo "${{ github.event.inputs.Message }} - $DeployToVercel"
+      run: echo "${{ github.event.inputs.Message }} - $DeployToCMS - $DeployToVercel"
