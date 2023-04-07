@@ -1,30 +1,30 @@
 name: deploy-to-dev-cms-vercel
 on:
-  # Description
   workflow_dispatch:
     inputs:
-      start_point:
-        description: 'SHA or branch name to fast-forward into hotfix'
+      Name:
+        type: choice
+        description: Whom to greet
+        options: 
+        - User1
+        - User2
+      Message:
         required: true
-        default: 'refs/remotes/origin/release'
-        type: string
-env:
-    APP_LOCATION: '/' # location of your client code
-
-permissions:
-  contents: write
+      DeployToCMS:
+        type: boolean
+        description: Deploy To CMS
+        required: true
+      DeployToVercel:
+        type: boolean
+        description: Deploy To Vercel
+        required: true
+      Environment:
+        type: environment
 
 jobs:
-  # This workflow fast forwards the hotfix branch to the latest commit in release branch
-  Fast_Forward_Hotfix_Branch_To_Release_Branch:
-    environment:
-      name: Dev
-    runs-on: prostore-actions-runner
+  greet:
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-
-      - name: "start_point1"
-        run: echo "${{ inputs.start_point }}'"
-
-      - name: "start_point2"
-        run: echo "${{ inputs.start_point }}'"
+    - name: Send greeting
+      run: echo "${{ github.event.inputs.Message }} ${{ fromJSON('["", ""]')[github.event.inputs.DeployToCMS] }} ${{ github.event.inputs.Name }}"
