@@ -22,7 +22,12 @@ on:
         description: 'Environment To Run Against'
         type: environment
         required: true
-
+env:
+  UserName: ${{ github.event.inputs.Name }}
+  Message: ${{ github.event.inputs.Message }}
+  DeployToCMS: ${{ github.event.inputs.DeployToCMS }}
+  DeployToVercel: ${{ github.event.inputs.DeployToVercel }}
+  DeployEnvironment: ${{ github.event.inputs.Environment }}
 jobs:
   Deploy:
     name: "Deploy to ${{ github.event.inputs.Environment }} environment"
@@ -30,12 +35,6 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ env.DeployEnvironment }}
-    env:
-      UserName: ${{ github.event.inputs.Name }}
-      Message: ${{ github.event.inputs.Message }}
-      DeployToCMS: ${{ github.event.inputs.DeployToCMS }}
-      DeployToVercel: ${{ github.event.inputs.DeployToVercel }}
-      DeployEnvironment: ${{ github.event.inputs.Environment }}
 
     steps:
     - name: Print User Inputs
