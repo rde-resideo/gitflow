@@ -18,20 +18,27 @@ on:
         type: boolean
         description: Deploy To Vercel
         required: true
-      userEnv:
+      Environment:
         type: environment
 
 jobs:
   greet:
     runs-on: ubuntu-latest
     env:
+      UserName: ${{ github.event.inputs.Name }}
+      Message: ${{ github.event.inputs.Message }}
       DeployToCMS: ${{ github.event.inputs.DeployToCMS }}
       DeployToVercel: ${{ github.event.inputs.DeployToVercel }}
+      DeployEnvironment: ${{ github.event.inputs.Environment }}
+
     steps:
+    - name: Print User Inputs
+      run: echo "$UserName - $Message - $DeployToCMS - $DeployToVercel - $DeployEnvironment"
+
     - name: DeployToCMS
       if: ${{ github.event.inputs.DeployToCMS  == 'true'}}
-      run: echo "${{ github.event.inputs.Message }} - $DeployToCMS - $DeployToVercel"
+      run: echo "${{ github.event.inputs.Message }}"
       
     - name: DeployToVercel
       if: ${{ github.event.inputs.DeployToVercel  == 'true'}}
-      run: echo "${{ github.event.inputs.Message }} - $DeployToCMS - $DeployToVercel"
+      run: echo "${{ github.event.inputs.Message }}"
