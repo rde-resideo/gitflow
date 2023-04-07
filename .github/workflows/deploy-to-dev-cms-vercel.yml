@@ -24,7 +24,7 @@ on:
 jobs:
   greet:
     environment:
-      name: ${{ github.event.inputs.Environment }}
+      name: "${{ github.event.inputs.Environment }}"
     runs-on: ubuntu-latest
 
     steps:
