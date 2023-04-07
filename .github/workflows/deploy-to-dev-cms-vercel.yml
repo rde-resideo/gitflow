@@ -26,5 +26,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Send greeting
-      run: echo "${{ github.event.inputs.Message }} ${{ fromJSON('["", ""]')[github.event.inputs.DeployToCMS] }} ${{ github.event.inputs.Name }} ${{ github.event.inputs.userEnv }}"
+    - name: DeployToCMS
+      if: ${{ github.event.inputs.DeployToCMS }}
+      run: echo "${{ [github.event.inputs.DeployToCMS] }} - ${{ github.event.inputs.Message }}"
+      
+    - name: DeployToVercel
+      if: ${{ github.event.inputs.DeployToVercel }}
+      run: echo "${{ [github.event.inputs.DeployToVercel] }} - ${{ github.event.inputs.Message }}"
