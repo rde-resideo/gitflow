@@ -43,7 +43,7 @@ jobs:
       with:
           ref: release
           fetch-depth: 0
-    - name: "Update to commit id - ${{ inputs.GitSHA }}"
+    - name: "Update hotfix branch to release branch commit id - ${{ inputs.GitSHA }}"
       run: |
           echo Reset Git Branch
           git add . && git reset --hard
