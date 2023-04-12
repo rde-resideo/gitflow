@@ -58,8 +58,8 @@ jobs:
         ref: ${{ inputs.GitBranch }}
         fetch-depth: 0
 
-    - name: "Input Parameters"
-      run: echo "${{ toJSON(env) }}"
+    - name: "Input Parameters1"
+      run: echo $IMAGE_TAG
 
     - name: "Set Blob Path"
       run: |
@@ -72,5 +72,8 @@ jobs:
           "QAIDImageWithTag=prdeu2svcecomm.azurecr.io/devbuild/resideo-xm1-id:$IMAGE_TAG" >> $env:GITHUB_ENV
           cp ".env.example" ".env"
 
-    - name: "Input Parameters"
-      run: echo ${{ env.CDImageNoTag }}:${{ env.IMAGE_TAG }}
+    - name: "Input Parameters2"
+      run: echo $CDImageNoTag:${{ env.IMAGE_TAG }}
+
+    - name: "Input Parameters3"
+      run: echo ${{ env.CDImageNoTag }}:$IMAGE_TAG
