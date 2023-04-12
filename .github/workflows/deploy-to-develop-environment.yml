@@ -10,12 +10,12 @@ on:
         options: 
         - develop
       DeployToCMS:
-        description: Deploy To CMS
+        description: "Deploy to Sitecore CMS"
         type: boolean
         default: true
         required: true
       DeployToVercel:
-        description: Deploy To Vercel
+        description: "Deploy to Vercel"
         type: boolean
         default: true
         required: true
