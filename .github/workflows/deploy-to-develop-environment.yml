@@ -42,6 +42,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.GitBranch }}
+        fetch-depth: 0
 
     - name: Print User Inputs
       run: echo "DeployToCMS - $DeployToCMS | DeployToVercel - $DeployToVercel | Environment - $Environment | Branch - $GitBranch | VAR1 - ${{ vars.VAR1 }}"
