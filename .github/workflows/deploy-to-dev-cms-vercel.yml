@@ -46,9 +46,9 @@ jobs:
       run: echo "${{ toJSON(env) }}"
         
     - name: DeployToCMS
-      if: ${{ $DeployToCMS }}
+      if: ${{ inputs.DeployToCMS  == 'true' }}
       run: echo "DeployToCMS => $DeployToCMS"
       
     - name: DeployToVercel
-      if: ${{ $DeployToVercel }}
+      if: ${{ inputs.DeployToVercel  == 'true' }}
       run: echo "DeployToVercel => $DeployToVercel"
