@@ -8,23 +8,25 @@ on:
         description: Environment To Run Against
         options: 
         - develop
-      Message:
-        required: true
       DeployToCMS:
-        type: boolean
         description: Deploy To CMS
+        type: boolean
+        default: true
         required: true
       DeployToVercel:
-        type: boolean
         description: Deploy To Vercel
+        type: boolean
+        default: true
         required: true
+      #Message:
+      #  required: true
       #Environment:
       #  description: 'Environment To Run Against'
       #  type: environment
       #  required: true
 env:
-  UserName: ${{ github.event.inputs.Message }}
-  Message: ${{ github.event.inputs.Message }}
+  UserName: ${{ github.event.inputs.DeployToCMS }}
+  Message: ${{ github.event.inputs.DeployToCMS }}
   DeployToCMS: ${{ github.event.inputs.DeployToCMS }}
   DeployToVercel: ${{ github.event.inputs.DeployToVercel }}
   DeployEnvironment: ${{ github.event.inputs.Environment }}
