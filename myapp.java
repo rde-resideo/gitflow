@@ -1,4 +1,4 @@
-import java.util.Scanner; 41
+import java.util.Scanner; 42
 
 class MyFirstClass
 {
