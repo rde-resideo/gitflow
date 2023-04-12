@@ -8,13 +8,13 @@ on:
         #required: true
         description: "Deployment Environment"
         options: 
-        - develop
+        - Dev
       GitBranch:
         type: choice
         #required: true
         description: "Git Branch"
         options: 
-        - release
+        - develop
       DeployToCMS:
         description: "Deploy to Sitecore CMS"
         type: boolean
@@ -32,13 +32,25 @@ env:
   DeployToCMS: ${{ inputs.DeployToCMS }}
   DeployToVercel: ${{ inputs.DeployToVercel }}
 
+  APP_LOCATION: '/' # location of your client code
+  GITHUB_CONTEXT: ${{ toJson(github) }}  
+  ACR_CD_IMAGE: ${{ secrets.REGISTRY_URI }}/${{ secrets.ACR_CD_IMAGE }}
+  ACR_CM_IMAGE: ${{ secrets.REGISTRY_URI }}/${{ secrets.ACR_CM_IMAGE }}
+  ACR_ID_IMAGE: ${{ secrets.REGISTRY_URI }}/${{ secrets.ACR_ID_IMAGE }}
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  IMAGE_TAG: $("${{ github.sha }}".SubString(0, 7))
+
+permissions:
+    contents: write
+
 jobs:
   deploy-to-cms:
     name: "Deploy to Sitecore CMS"
     if: ${{ github.event.inputs.DeployToCMS  == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: prostore-actions-runner
     environment:
-      name: develop
+      name: Dev
 
     steps:
     - uses: actions/checkout@v3
@@ -46,42 +58,91 @@ jobs:
         ref: ${{ inputs.GitBranch }}
         fetch-depth: 0
 
-    - name: Print User Inputs
-      run: echo "DeployToCMS - $DeployToCMS | DeployToVercel - $DeployToVercel | Environment - $Environment | Branch - $GitBranch | VAR1 - ${{ vars.VAR1 }}"
-
     - name: "Input Parameters"
       run: echo "${{ toJSON(env) }}"
 
     - name: "Set Blob Path"
-      run: echo "Set Blob Path"
+      run: |
+          "ArtifactPath=${{ github.repository }}/${{ inputs.GitBranch }}/sitecore/$(Get-Date -Format 'MM-dd-yyyy')/$IMAGE_TAG" >> $env:GITHUB_ENV
+          "CDImageNoTag=prdeu2svcecomm.azurecr.io/devbuild/resideo-xm1-cd" >> $env:GITHUB_ENV
+          "CMImageNoTag=prdeu2svcecomm.azurecr.io/devbuild/resideo-xm1-cm" >> $env:GITHUB_ENV
+          "IDImageNoTag=prdeu2svcecomm.azurecr.io/devbuild/resideo-xm1-id" >> $env:GITHUB_ENV
+          "QACDImageWithTag=prdeu2svcecomm.azurecr.io/devbuild/resideo-xm1-cd:$IMAGE_TAG" >> $env:GITHUB_ENV
+          "QACMImageWithTag=prdeu2svcecomm.azurecr.io/devbuild/resideo-xm1-cm:$IMAGE_TAG" >> $env:GITHUB_ENV
+          "QAIDImageWithTag=prdeu2svcecomm.azurecr.io/devbuild/resideo-xm1-id:$IMAGE_TAG" >> $env:GITHUB_ENV
+          cp ".env.example" ".env"
 
     - name: "Login To Docker"
-      run: echo "Login To Docker"
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.REGISTRY_URI }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
 
     - name: "Sync Sitecore Content and Publish"
-      run: echo "Sync Sitecore Content and Publish"
+      continue-on-error: true
+      run: |
+          dotnet tool restore
+          dotnet new tool-manifest
+          dotnet sitecore ser pkg create -o ${{ secrets.CM_CONTENT_PACKAGE }}
+          dotnet sitecore login --client-credentials true --auth ${{ secrets.ID_URL }} --cm ${{ secrets.CM_URL }} --allow-write true --client-id SitecoreCLIServer --client-secret ${{ secrets.SITECORE_CLI_CLIENT_SECRET }}
+          dotnet sitecore ser package install --package ${{ secrets.CM_CONTENT_PACKAGE }}.itempackage --cm ${{ secrets.CM_URL }} --client-id SitecoreCLIServer --client-secret ${{ secrets.SITECORE_CLI_CLIENT_SECRET }} -i InitItems
+          dotnet sitecore ser package install --package ${{ secrets.CM_CONTENT_PACKAGE }}.itempackage --cm ${{ secrets.CM_URL }} --client-id SitecoreCLIServer --client-secret ${{ secrets.SITECORE_CLI_CLIENT_SECRET }} -i Resideo
+          dotnet sitecore ser package install --package ${{ secrets.CM_CONTENT_PACKAGE }}.itempackage --cm ${{ secrets.CM_URL }} --client-id SitecoreCLIServer --client-secret ${{ secrets.SITECORE_CLI_CLIENT_SECRET }} -i Resideo-Content
+          dotnet sitecore plugin add -n Sitecore.DevEx.Extensibility.Publishing --version 4.1.0
+          dotnet sitecore publish
 
     - name: "Build Image and Push"
-      run: echo "Build Image and Push"
+      run: |
+          docker tag ${{ env.QACDImageWithTag }} ${{ env.CDImageNoTag }}:${{ env.IMAGE_TAG }}
+          docker tag ${{ env.QACDImageWithTag }} ${{ env.CDImageNoTag }}:latest
+          docker tag ${{ env.QACMImageWithTag }} ${{ env.CMImageNoTag }}:${{ env.IMAGE_TAG }}
+          docker tag ${{ env.QACMImageWithTag }} ${{ env.CMImageNoTag }}:latest
+          docker tag ${{ env.QAIDImageWithTag }} ${{ env.IDImageNoTag }}:${{ env.IMAGE_TAG }}
+          docker tag ${{ env.QAIDImageWithTag }} ${{ env.IDImageNoTag }}:latest
+
+          docker push ${{ env.CDImageNoTag }}:${{ env.IMAGE_TAG }}
+          docker push ${{ env.CDImageNoTag }}:latest
+          docker push ${{ env.CMImageNoTag }}:${{ env.IMAGE_TAG }}
+          docker push ${{ env.CMImageNoTag }}:latest
+          docker push ${{ env.IDImageNoTag }}:${{ env.IMAGE_TAG }}
+          docker push ${{ env.IDImageNoTag }}:latest
 
     - name: "Login To Azure"
-      run: echo "Login To Azure"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_AD_SP }}
 
     - name: "Deploy To CD"
-      run: echo "Deploy To CD"
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ secrets.AZ_CD_APP_NAME }}
+        images: ${{ env.CDImageNoTag }}:${{ env.IMAGE_TAG }}
 
     - name: "Deploy To CM"
-      run: echo "Deploy To CM"
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ secrets.AZ_CM_APP_NAME }}
+        images: ${{ env.CMImageNoTag }}:${{ env.IMAGE_TAG }}
 
     - name: "Deploy To ID"
-      run: echo "Deploy To ID"
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ secrets.AZ_ID_APP_NAME }}
+        images: ${{ env.IDImageNoTag }}:${{ env.IMAGE_TAG }}
 
     - name: "Logout From Azure"
-      run: echo "Logout From Azure"
+      run: |
+        az logout
 
     - name: "Upload Sitecore Content"
-      if: ${{ vars.UPLOAD_SITECORE_CONTENT  == 'true' }}
-      run: echo "Upload Sitecore Content"
+      if: ${{ vars.UPLOAD_SITECORE_CONTENT_DEV  == 'true' }}
+      id: Upload_Build_Artifacts
+      uses: fixpoint/azblob-upload-artifact@v4
+      with:
+        connection-string: ${{ secrets.AZ_STORAGE_CONNECTION }}
+        name: '${{ env.ArtifactPath }}'
+        path: .
 
   deploy-to-vercel:
     name: "Deploy to Vercel"
@@ -93,29 +154,37 @@ jobs:
       (needs.deploy-to-cms.result == 'success' || needs.deploy-to-cms.result == 'skipped')
 
     environment:
-      name: develop
+      name: Dev
 
     steps:
     - uses: actions/checkout@v3
-
-    - name: Print User Inputs
-      run: echo "DeployToCMS - $DeployToCMS | DeployToVercel - $DeployToVercel | Environment - $Environment | Branch - $GitBranch | VAR1 - ${{ vars.VAR1 }}"
+      with:
+        ref: ${{ inputs.GitBranch }}
+        fetch-depth: 0
 
     - name: "Input Parameters"
       run: echo "${{ toJSON(env) }}"
 
     - name: "Set Blob Path"
-      run: echo "Set Blob Path"
+      run: |
+          "ArtifactPath=${{ github.repository }}/${{ inputs.GitBranch }}/vercel/$(Get-Date -Format 'MM-dd-yyyy')/$("$IMAGE_TAG".SubString(0, 7))" >> $env:GITHUB_ENV
 
     - name: "Vercel Pull"
-      run: echo "Vercel Pull"
+      working-directory: ./src/rendering
+      run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
     - name: "Vercel Build"
-      run: echo "Vercel Build"
+      working-directory: ./src/rendering
+      run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
     - name: "Vercel Deploy"
-      run: echo "Vercel Deploy"
+      working-directory: ./src/rendering
+      run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
     - name: "Upload Vercel Artifacts"
-      if: ${{ vars.UPLOAD_VERCEL_ARTIFACTS  == 'true' }}
-      run: echo "Upload Vercel Artifacts"
+      if: ${{ vars.UPLOAD_VERCEL_ARTIFACTS_DEV  == 'true' }}
+      uses: fixpoint/azblob-upload-artifact@v4
+      with:
+        connection-string: ${{ secrets.AZ_STORAGE_CONNECTION }}
+        name: '${{ env.ArtifactPath }}'
+        path: ./src/rendering/src/pages
