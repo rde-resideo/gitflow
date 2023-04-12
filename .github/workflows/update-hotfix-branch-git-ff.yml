@@ -1,4 +1,4 @@
-name: update-hotfix-branch-ff
+name: update-hotfix-branch-git-ff
 
 on:
   workflow_dispatch:
@@ -31,7 +31,7 @@ env:
 
 jobs:
   update-hotfix-branch-from-release-branch:
-    name: "Deploy to Sitecore CMS"
+    name: "Update Hotfix Branch from Release Branch"
     #if: ${{ github.event.inputs.GitSHA  != '' }}
     runs-on: ubuntu-latest
 
