@@ -5,8 +5,8 @@ on:
     inputs:
       Environment:
         type: choice
-        required: true
-        description: Environment To Run Against
+        #required: true
+        description: "Target Environment :"
         options: 
         - develop
       DeployToCMS:
