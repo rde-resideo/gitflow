@@ -29,7 +29,7 @@ env:
 jobs:
   deploy-to-cms:
     name: "cms deploy - ${{ github.event.inputs.Environment }} environment"
-    if: ${{ $DeployToCMS }}
+    if: ${{ $DeployToCMS  == 'true' }}
     runs-on: ubuntu-latest
     environment:
       name: ${{ $EnvironmentToDeploy }}
@@ -76,7 +76,7 @@ jobs:
 
   deploy-to-vercel:
     name: "vercel deploy - ${{ github.event.inputs.Environment }} environment"
-    if: ${{ $DeployToVercel }}
+    if: ${{ $DeployToVercel  == 'true' }}
     needs: deploy-to-cms
     runs-on: ubuntu-latest
     environment:
