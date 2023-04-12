@@ -4,10 +4,10 @@ on:
     inputs:
       Environment:
         type: choice
+        required: true
         description: Environment To Run Against
         options: 
         - develop
-        - master
       Message:
         required: true
       DeployToCMS:
