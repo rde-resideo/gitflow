@@ -43,7 +43,7 @@ jobs:
       with:
           ref: hotfix
           fetch-depth: 0
-    - name: "Update master branch to hotfix commit id - ${{ inputs.GitSHA }}"
+    - name: "Update master branch to hotfix branch commit id - ${{ inputs.GitSHA }}"
       run: |
           echo Reset Git Branch
           git add . && git reset --hard
