@@ -27,7 +27,7 @@ env:
 
 jobs:
   deploy-to-cms:
-    name: "cms deploy - develop environment"
+    name: "Deploy to Sitecore CMS"
     if: ${{ github.event.inputs.DeployToCMS  == 'true' }}
     runs-on: ubuntu-latest
     environment:
@@ -74,7 +74,7 @@ jobs:
       run: echo "Upload Sitecore Content"
 
   deploy-to-vercel:
-    name: "vercel deploy - develop environment"
+    name: "Deploy to Vercel"
     runs-on: ubuntu-latest
     needs: [deploy-to-cms]
     if: |
