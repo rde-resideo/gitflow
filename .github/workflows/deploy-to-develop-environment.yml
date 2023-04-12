@@ -75,8 +75,11 @@ jobs:
 
   deploy-to-vercel:
     name: "vercel deploy - develop environment"
-    if: ${{ github.event.inputs.DeployToVercel  == 'true' }}
-    needs: deploy-to-cms
+    needs: [deploy-to-cms]
+    if: |
+      github.event.inputs.DeployToVercel  == 'true' &&
+      (needs.deploy-to-cms.result == 'success' || needs.deploy-to-cms.result == 'skipped')
+
     runs-on: ubuntu-latest
     environment:
       name: develop
