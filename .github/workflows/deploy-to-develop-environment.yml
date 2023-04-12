@@ -35,10 +35,10 @@ jobs:
       name: ${{ $EnvironmentToDeploy }}
 
     steps:
-	- uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
     - name: Print User Inputs
-      run: echo "DeployToCMS : $DeployToCMS | DeployToVercel : $DeployToVercel | Environment : $EnvironmentToDeploy | VAR1 : ${{ vars.VAR1 }}"
+      run: echo "DeployToCMS - $DeployToCMS | DeployToVercel - $DeployToVercel | Environment - $EnvironmentToDeploy | VAR1 - ${{ vars.VAR1 }}"
 
     - name: Environment Values
       run: echo "${{ toJSON(env) }}"
@@ -71,22 +71,22 @@ jobs:
       run: echo "Logout From Azure"
 
     - name: "Upload Sitecore Content"
-	  if: ${{ vars.UPLOAD_SITECORE_CONTENT  == 'true' }}
+      if: ${{ vars.UPLOAD_SITECORE_CONTENT  == 'true' }}
       run: echo "Upload Sitecore Content"
 
   deploy-to-vercel:
     name: "vercel deploy - ${{ github.event.inputs.Environment }} environment"
     if: ${{ $DeployToVercel }}
-	needs: deploy-to-cms
+    needs: deploy-to-cms
     runs-on: ubuntu-latest
     environment:
       name: ${{ $EnvironmentToDeploy }}
 
     steps:
-	- uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
     - name: Print User Inputs
-      run: echo "DeployToCMS : $DeployToCMS | DeployToVercel : $DeployToVercel | Environment : $EnvironmentToDeploy | VAR1 : ${{ vars.VAR1 }}"
+      run: echo "DeployToCMS - $DeployToCMS | DeployToVercel - $DeployToVercel | Environment - $EnvironmentToDeploy | VAR1 - ${{ vars.VAR1 }}"
 
     - name: Environment Values
       run: echo "${{ toJSON(env) }}"
@@ -104,5 +104,5 @@ jobs:
       run: echo "Vercel Deploy"
 
     - name: "Upload Vercel Artifacts"
-	  if: ${{ vars.UPLOAD_VERCEL_ARTIFACTS  == 'true' }}
+      if: ${{ vars.UPLOAD_VERCEL_ARTIFACTS  == 'true' }}
       run: echo "Upload Vercel Artifacts"
