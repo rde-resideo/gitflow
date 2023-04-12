@@ -9,7 +9,7 @@ on:
         description: "Deployment Environment"
         options: 
         - develop
-      BranchName:
+      GitBranch:
         type: choice
         #required: true
         description: "Git Branch"
@@ -27,10 +27,10 @@ on:
         required: true
 
 env:
+  DeploymentEnvironment: ${{ inputs.Environment }}
+  GitBranch: ${{ inputs.GitBranch }}
   DeployToCMS: ${{ inputs.DeployToCMS }}
-  BranchName: ${{ inputs.BranchName }}
   DeployToVercel: ${{ inputs.DeployToVercel }}
-  EnvironmentToDeploy: ${{ inputs.Environment }}
 
 jobs:
   deploy-to-cms:
@@ -44,9 +44,9 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Print User Inputs
-      run: echo "DeployToCMS - $DeployToCMS | DeployToVercel - $DeployToVercel | Environment - $EnvironmentToDeploy | Branch - $BranchName | VAR1 - ${{ vars.VAR1 }}"
+      run: echo "DeployToCMS - $DeployToCMS | DeployToVercel - $DeployToVercel | Environment - $DeploymentEnvironment | Branch - $GitBranch | VAR1 - ${{ vars.VAR1 }}"
 
-    - name: Environment Values
+    - name: "Input Parameters"
       run: echo "${{ toJSON(env) }}"
 
     - name: "Set Blob Path"
@@ -96,9 +96,9 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Print User Inputs
-      run: echo "DeployToCMS - $DeployToCMS | DeployToVercel - $DeployToVercel | Environment - $EnvironmentToDeploy | Branch - $BranchName | VAR1 - ${{ vars.VAR1 }}"
+      run: echo "DeployToCMS - $DeployToCMS | DeployToVercel - $DeployToVercel | Environment - $DeploymentEnvironment | Branch - $GitBranch | VAR1 - ${{ vars.VAR1 }}"
 
-    - name: Environment Values
+    - name: "Input Parameters"
       run: echo "${{ toJSON(env) }}"
 
     - name: "Set Blob Path"
