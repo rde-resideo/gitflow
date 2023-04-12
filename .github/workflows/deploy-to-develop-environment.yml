@@ -6,7 +6,7 @@ on:
       Environment:
         type: choice
         #required: true
-        description: "Deployment environment"
+        description: "Deployment Environment"
         options: 
         - develop
       DeployToCMS:
