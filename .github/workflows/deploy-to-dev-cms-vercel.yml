@@ -25,18 +25,18 @@ on:
       #  type: environment
       #  required: true
 env:
-  UserName: ${{ github.event.inputs.DeployToCMS }}
-  Message: ${{ github.event.inputs.DeployToCMS }}
-  DeployToCMS: ${{ github.event.inputs.DeployToCMS }}
-  DeployToVercel: ${{ github.event.inputs.DeployToVercel }}
-  DeployEnvironment: ${{ github.event.inputs.Environment }}
+  UserName: ${{ inputs.DeployToCMS }}
+  Message: ${{ inputs.DeployToCMS }}
+  DeployToCMS: ${{ inputs.DeployToCMS }}
+  DeployToVercel: ${{ inputs.DeployToVercel }}
+  DeployEnvironment: ${{ inputs.Environment }}
 jobs:
   Deploy:
     name: "Deploy to ${{ github.event.inputs.Environment }} environment"
-    #if: ${{ github.event.inputs.Environment == 'master' }}
+    #if: ${{ inputs.Environment == 'master' }}
     runs-on: ubuntu-latest
     environment:
-      name: ${{ github.event.inputs.Environment }}
+      name: ${{ inputs.Environment }}
 
     steps:
     - name: Print User Inputs
@@ -46,9 +46,9 @@ jobs:
       run: echo "${{ toJSON(env) }}"
         
     - name: DeployToCMS
-      if: ${{ github.event.inputs.DeployToCMS  == 'true'}}
-      run: echo "${{ github.event.inputs.Message }}"
+      if: ${{ inputs.DeployToCMS  == 'true'}}
+      run: echo "DeployToCMS => $DeployToCMS"
       
     - name: DeployToVercel
-      if: ${{ github.event.inputs.DeployToVercel  == 'true'}}
-      run: echo "${{ github.event.inputs.Message }}"
+      if: ${{ inputs.DeployToVercel  == 'true'}}
+      run: echo "DeployToVercel => $DeployToVercel"
