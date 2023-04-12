@@ -1,52 +1,58 @@
 name: update-hotfix-branch-ff
+
 on:
   workflow_dispatch:
     inputs:
-      Environment:
+      TargetGitBranch:
         type: choice
-        description: Environment To Run Against
+        required: true
+        description: "Targer Git Branch (fast forward)"
         options: 
-        - develop
-        - master
-      Message:
+        - hotfix
+      SourceGitBranch:
+        type: choice
         required: true
-      DeployToCMS:
-        type: boolean
-        description: Deploy To CMS
+        description: "Source Git Branch"
+        options: 
+        - release
+      GitSHA:
+        description: "Git SHA or commit id from release branch"
+        type: string
+        default: 'refs/remotes/origin/release'
         required: true
-      DeployToVercel:
-        type: boolean
-        description: Deploy To Vercel
-        required: true
-      #Environment:
-      #  description: 'Environment To Run Against'
-      #  type: environment
-      #  required: true
+
+permissions:
+  contents: write
+
 env:
-  UserName: ${{ github.event.inputs.Message }}
-  Message: ${{ github.event.inputs.Message }}
-  DeployToCMS: ${{ github.event.inputs.DeployToCMS }}
-  DeployToVercel: ${{ github.event.inputs.DeployToVercel }}
-  DeployEnvironment: ${{ github.event.inputs.Environment }}
+  TargetGitBranch: ${{ inputs.TargetGitBranch }}
+  SourceGitBranch: ${{ inputs.SourceGitBranch }}
+  GitSHA: ${{ inputs.GitSHA }}
+
 jobs:
-  Deploy:
-    name: "Deploy to ${{ github.event.inputs.Environment }} environment"
-    #if: ${{ github.event.inputs.Environment == 'master' }}
+  update-hotfix-branch-from-release-branch:
+    name: "Deploy to Sitecore CMS"
+    #if: ${{ github.event.inputs.GitSHA  != '' }}
     runs-on: ubuntu-latest
-    environment:
-      name: ${{ github.event.inputs.Environment }}
 
     steps:
-    - name: Print User Inputs
-      run: echo "$UserName - $Message - $DeployToCMS - $DeployToVercel - $DeployEnvironment - ${{ vars.VAR1 }}"
-
-    - name: Output Inputs
+    - name: "Input Parameters"
       run: echo "${{ toJSON(env) }}"
 
-    - name: DeployToCMS
-      if: ${{ github.event.inputs.DeployToCMS  == 'true'}}
-      run: echo "${{ github.event.inputs.Message }}"
-      
-    - name: DeployToVercel
-      if: ${{ github.event.inputs.DeployToVercel  == 'true'}}
-      run: echo "${{ github.event.inputs.Message }}"
+    - uses: actions/checkout@v3
+      with:
+          ref: release
+          fetch-depth: 0
+    - name: "Update hotfix branch to release branch commit id - ${{ inputs.GitSHA }}"
+      run: |
+          echo Reset Git Branch
+          git add . && git reset --hard
+          echo Git Checkout Release Branch
+          git checkout --force -B release ${{ inputs.GitSHA }}
+          echo Git Checkout Hotfix Branch
+          git checkout --force -B hotfix refs/remotes/origin/hotfix
+          echo Git Fast-forward Hotfix Branch To Release Branch
+          git merge release --ff-only
+          echo Git Push Hotfix Branch
+          git push origin hotfix
+          echo Done
