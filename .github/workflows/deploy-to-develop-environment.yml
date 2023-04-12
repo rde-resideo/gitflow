@@ -96,7 +96,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Print User Inputs
-      run: echo "DeployToCMS - $DeployToCMS | DeployToVercel - $DeployToVercel | Environment - $EnvironmentToDeploy | VAR1 - ${{ vars.VAR1 }}"
+      run: echo "DeployToCMS - $DeployToCMS | DeployToVercel - $DeployToVercel | Environment - $EnvironmentToDeploy | Branch - $BranchName | VAR1 - ${{ vars.VAR1 }}"
 
     - name: Environment Values
       run: echo "${{ toJSON(env) }}"
