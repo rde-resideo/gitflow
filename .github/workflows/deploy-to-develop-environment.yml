@@ -1,4 +1,5 @@
 name: deploy-to-develop-environment
+
 on:
   workflow_dispatch:
     inputs:
@@ -8,6 +9,7 @@ on:
         description: Environment To Run Against
         options: 
         - develop
+        - hotfix
       DeployToCMS:
         description: Deploy To CMS
         type: boolean
@@ -18,37 +20,89 @@ on:
         type: boolean
         default: true
         required: true
-      #Message:
-      #  required: true
-      #Environment:
-      #  description: 'Environment To Run Against'
-      #  type: environment
-      #  required: true
+
 env:
-  UserName: ${{ inputs.DeployToCMS }}
-  Message: ${{ inputs.DeployToCMS }}
   DeployToCMS: ${{ inputs.DeployToCMS }}
   DeployToVercel: ${{ inputs.DeployToVercel }}
-  DeployEnvironment: ${{ inputs.Environment }}
+  EnvironmentToDeploy: ${{ inputs.Environment }}
+
 jobs:
-  Deploy:
-    name: "Deploy to ${{ github.event.inputs.Environment }} environment"
-    #if: ${{ inputs.Environment == 'master' }}
+  deploy-to-cms:
+    name: "cms deploy - ${{ github.event.inputs.Environment }} environment"
+    if: ${{ $DeployToCMS }}
     runs-on: ubuntu-latest
     environment:
-      name: ${{ inputs.Environment }}
+      name: ${{ $EnvironmentToDeploy }}
 
     steps:
-    - name: Print User Inputs
-      run: echo "$UserName - $Message - $DeployToCMS - $DeployToVercel - $DeployEnvironment - ${{ vars.VAR1 }}"
+	- uses: actions/checkout@v3
 
-    - name: Output Inputs
+    - name: Print User Inputs
+      run: echo "DeployToCMS : $DeployToCMS | DeployToVercel : $DeployToVercel | Environment : $EnvironmentToDeploy | VAR1 : ${{ vars.VAR1 }}"
+
+    - name: Environment Values
       run: echo "${{ toJSON(env) }}"
-        
-    - name: DeployToCMS
-      if: ${{ github.event.inputs.DeployToCMS  == 'true' }}
-      run: echo "DeployToCMS => $DeployToCMS"
-      
-    - name: DeployToVercel
-      if: ${{ github.event.inputs.DeployToVercel  == 'true' }}
-      run: echo "DeployToVercel => $DeployToVercel"
+
+    - name: "Set Blob Path"
+      run: echo "Set Blob Path"
+
+    - name: "Login To Docker"
+      run: echo "Login To Docker"
+
+    - name: "Sync Sitecore Content and Publish"
+      run: echo "Sync Sitecore Content and Publish"
+
+    - name: "Build Image and Push"
+      run: echo "Build Image and Push"
+
+    - name: "Login To Azure"
+      run: echo "Login To Azure"
+
+    - name: "Deploy To CD"
+      run: echo "Deploy To CD"
+
+    - name: "Deploy To CM"
+      run: echo "Deploy To CM"
+
+    - name: "Deploy To ID"
+      run: echo "Deploy To ID"
+
+    - name: "Logout From Azure"
+      run: echo "Logout From Azure"
+
+    - name: "Upload Sitecore Content"
+	  if: ${{ vars.UPLOAD_SITECORE_CONTENT  == 'true' }}
+      run: echo "Upload Sitecore Content"
+
+  deploy-to-vercel:
+    name: "vercel deploy - ${{ github.event.inputs.Environment }} environment"
+    if: ${{ $DeployToVercel }}
+	needs: deploy-to-cms
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ $EnvironmentToDeploy }}
+
+    steps:
+	- uses: actions/checkout@v3
+
+    - name: Print User Inputs
+      run: echo "DeployToCMS : $DeployToCMS | DeployToVercel : $DeployToVercel | Environment : $EnvironmentToDeploy | VAR1 : ${{ vars.VAR1 }}"
+
+    - name: Environment Values
+      run: echo "${{ toJSON(env) }}"
+
+    - name: "Set Blob Path"
+      run: echo "Set Blob Path"
+
+    - name: "Vercel Pull"
+      run: echo "Vercel Pull"
+
+    - name: "Vercel Build"
+      run: echo "Vercel Build"
+
+    - name: "Vercel Deploy"
+      run: echo "Vercel Deploy"
+
+    - name: "Upload Vercel Artifacts"
+	  if: ${{ vars.UPLOAD_VERCEL_ARTIFACTS  == 'true' }}
+      run: echo "Upload Vercel Artifacts"
