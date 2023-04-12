@@ -1,1 +1,52 @@
-update-hotfix-branch-ff
+name: update-hotfix-branch-ff
+on:
+  workflow_dispatch:
+    inputs:
+      Environment:
+        type: choice
+        description: Environment To Run Against
+        options: 
+        - develop
+        - master
+      Message:
+        required: true
+      DeployToCMS:
+        type: boolean
+        description: Deploy To CMS
+        required: true
+      DeployToVercel:
+        type: boolean
+        description: Deploy To Vercel
+        required: true
+      #Environment:
+      #  description: 'Environment To Run Against'
+      #  type: environment
+      #  required: true
+env:
+  UserName: ${{ github.event.inputs.Message }}
+  Message: ${{ github.event.inputs.Message }}
+  DeployToCMS: ${{ github.event.inputs.DeployToCMS }}
+  DeployToVercel: ${{ github.event.inputs.DeployToVercel }}
+  DeployEnvironment: ${{ github.event.inputs.Environment }}
+jobs:
+  Deploy:
+    name: "Deploy to ${{ github.event.inputs.Environment }} environment"
+    #if: ${{ github.event.inputs.Environment == 'master' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.Environment }}
+
+    steps:
+    - name: Print User Inputs
+      run: echo "$UserName - $Message - $DeployToCMS - $DeployToVercel - $DeployEnvironment - ${{ vars.VAR1 }}"
+
+    - name: Output Inputs
+      run: echo "${{ toJSON(env) }}"
+
+    - name: DeployToCMS
+      if: ${{ github.event.inputs.DeployToCMS  == 'true'}}
+      run: echo "${{ github.event.inputs.Message }}"
+      
+    - name: DeployToVercel
+      if: ${{ github.event.inputs.DeployToVercel  == 'true'}}
+      run: echo "${{ github.event.inputs.Message }}"
