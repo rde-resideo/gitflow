@@ -1,52 +1,99 @@
 name: deploy-to-hotfix-cms-vercel
+# **What it does**: On manual trigger, it deploys hotfix branch code to Hotfix environment both for Sitecore CMS and Vercel.
+
 on:
   workflow_dispatch:
     inputs:
       Environment:
         type: choice
-        description: Environment To Run Against
-        options: 
-        - develop
-        - master
-      Message:
         required: true
+        description: "Deployment Environment"
+        options: 
+        - Hotfix
+      GitBranch:
+        type: choice
+        required: true
+        description: "Git Branch"
+        options: 
+        - hotfix
       DeployToCMS:
+        description: "Deploy to Sitecore CMS"
         type: boolean
-        description: Deploy To CMS
+        default: true
         required: true
       DeployToVercel:
+        description: "Deploy to Vercel"
         type: boolean
-        description: Deploy To Vercel
+        default: true
         required: true
-      #Environment:
-      #  description: 'Environment To Run Against'
-      #  type: environment
-      #  required: true
+
 env:
-  UserName: ${{ github.event.inputs.Message }}
-  Message: ${{ github.event.inputs.Message }}
-  DeployToCMS: ${{ github.event.inputs.DeployToCMS }}
-  DeployToVercel: ${{ github.event.inputs.DeployToVercel }}
-  DeployEnvironment: ${{ github.event.inputs.Environment }}
+  Environment: ${{ inputs.Environment }}
+  GitBranch: ${{ inputs.GitBranch }}
+  DeployToCMS: ${{ inputs.DeployToCMS }}
+  DeployToVercel: ${{ inputs.DeployToVercel }}
+
+  APP_LOCATION: '/' # location of your client code
+  GITHUB_CONTEXT: ${{ toJson(github) }}  
+  ACR_CD_IMAGE: ${{ secrets.REGISTRY_URI }}/${{ secrets.ACR_CD_IMAGE }}
+  ACR_CM_IMAGE: ${{ secrets.REGISTRY_URI }}/${{ secrets.ACR_CM_IMAGE }}
+  ACR_ID_IMAGE: ${{ secrets.REGISTRY_URI }}/${{ secrets.ACR_ID_IMAGE }}
+  NEW_IMAGE_TAG: $("${{ github.sha }}".SubString(0, 7))
+  
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  NPM_PKG_GITHUB_AUTH_TOKEN: ${{ secrets.NPM_PKG_GITHUB_AUTH_TOKEN }}
+  GRAPHQL_PERSISTED_QUERIES_AUTH_TOKEN: ${{ secrets.GRAPHQL_PERSISTED_QUERIES_AUTH_TOKEN }}
+  # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+permissions:
+    contents: read
+
 jobs:
-  Deploy:
-    name: "Deploy to ${{ github.event.inputs.Environment }} environment"
-    #if: ${{ github.event.inputs.Environment == 'master' }}
-    runs-on: ubuntu-latest
+  deploy-to-cms:
+    name: "Deploy to Sitecore CMS"
+    if: ${{ github.event.inputs.DeployToCMS  == 'true' }}
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      pull-requests: write # for Azure/static-web-apps-deploy to comment on PRs
+    runs-on: prostore-actions-runner
+    outputs:
+      Config: ${{ steps.cdApp.outputs.Config }}
     environment:
-      name: ${{ github.event.inputs.Environment }}
+      name: Hotfix
 
     steps:
-    - name: Print User Inputs
-      run: echo "$UserName - $Message - $DeployToCMS - $DeployToVercel - $DeployEnvironment - ${{ vars.VAR1 }}"
+    - name: 'Read Production Config'
+      if: true
+      id: cdApp
+      run: |
+        #$configVal=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?contains('CurrentSettings', name)].{Value:value}"  -o tsv)
+        echo "::set-output name=Config::'configValWeb'"
 
-    - name: Output Inputs
-      run: echo "${{ toJSON(env) }}"
+    - name: 'Print Production Config'
+      if: true
+      run: |
+        echo ${{ steps.cdApp.outputs.Config }}
 
-    - name: DeployToCMS
-      if: ${{ github.event.inputs.DeployToCMS  == 'true'}}
-      run: echo "${{ github.event.inputs.Message }}"
-      
-    - name: DeployToVercel
-      if: ${{ github.event.inputs.DeployToVercel  == 'true'}}
-      run: echo "${{ github.event.inputs.Message }}"
+    - name: Job Failed
+      if: ${{ failure() && steps.getProdConfig.conclusion == 'failure' }}
+      run: |
+        echo 'Job Failed'
+
+  deploy-to-vercel:
+    name: "Deploy to Vercel"
+    runs-on: ubuntu-latest
+    needs: [deploy-to-cms]
+    if: |
+      always() &&
+      github.event.inputs.DeployToVercel  == 'true' &&
+      (needs.deploy-to-cms.result == 'success' || needs.deploy-to-cms.result == 'skipped')
+
+    environment:
+      name: Hotfix
+
+    steps:
+    - name: "Print Current Settings from Job1"
+      run: |
+          echo ${{ needs.deploy-to-cms.outputs.Config }}
+
