@@ -194,15 +194,12 @@ jobs:
       PatchingStatus: ${{needs.task2-cms-deploy.outputs.PatchingStatus}}
       RestoreStatus: ${{needs.task2-cms-deploy.outputs.RestoreStatus}}
     steps:
-    - name: "Print Task2 Outputs"       
-      run: echo "Config:$Config, PatchingStatus:$PatchingStatus, RestoreStatus:$RestoreStatus"
-
     - name: "Rollback CM Config"
-      if: ${{ needs.task2-cms-deploy.outputs.PatchingStatus == 'true' }}
+      if: ${{ $PatchingStatus == 'true' }}
       run: |
-          echo "Rollback deployment for : $Environment, PatchingStatus - ${{needs.task2-cms-deploy.outputs.PatchingStatus}}"
+          echo "Rollback $Environment CM Config changes"
     
     - name: "No Rollback Required"
-      if: ${{ needs.task2-cms-deploy.outputs.PatchingStatus != 'true' }}
+      if: ${{ $PatchingStatus != 'true' }}
       run: |
-          echo "No Rollback Required for : $Environment, PatchingStatus - ${{needs.task2-cms-deploy.outputs.PatchingStatus}}"
+          echo "No Rollback Required"
