@@ -171,8 +171,8 @@ jobs:
           
   task8-rollback-on-error:
     name: "TASK 8 : Rollback On Error"
-    needs: [task2-cms-deploy, task7-swap-vercel]
-    #if: ${{ failure() }}
+    needs: [task2-cms-deploy]
+    if: ${{ failure() }}
     runs-on: ubuntu-latest
     environment:
       name: Hotfix
