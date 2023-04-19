@@ -150,6 +150,7 @@ jobs:
   task8-rollback-on-error:
     name: "TASK 8 : Rollback On Error"
     needs: [task7-swap-vercel]
+    if: ${{ failure() }}
     runs-on: ubuntu-latest
     steps:
     - name: "Rollback Reason"
