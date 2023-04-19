@@ -176,7 +176,13 @@ jobs:
           
   task8-deployment-completed:
     name: "8-Deployment Successful"
-    needs: [task7-swap-vercel]
+    needs: [task6-swap-cms, task7-swap-vercel]
+    if: |
+      always() &&
+      (
+        (github.event.inputs.DeployToCMS  == 'true' && needs.task6-swap-cms.result == 'success') ||
+        (github.event.inputs.DeployToVercel  == 'true' && needs.task7-swap-vercel.result == 'success')
+      )
     runs-on: ubuntu-latest
     environment:
       name: HotfixNoApproval
