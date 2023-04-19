@@ -60,11 +60,10 @@ jobs:
           echo "GitBranch : ${{ inputs.GitBranch }}"
           echo "DeployToCMS : ${{ inputs.DeployToCMS }}"
           echo "DeployToVercel : $DeployToVercel"
-
   task2-cms-deploy:
     name: "2-Deploy to CMS (Staging)"   # Image Tagging, Deploy to Staging, CM Config Patching
     needs: [task1-print-inputs]
-    if: $DeployToCMS  == 'true'
+    if: ${{ github.event.inputs.DeployToCMS  == 'true' }}
     permissions:
       contents: read # for actions/checkout to fetch code
       pull-requests: write # for Azure/static-web-apps-deploy to comment on PRs
@@ -96,21 +95,17 @@ jobs:
       id: cmConfigRestore
       run: |
         echo "::set-output name=Status::true"
-
     - name: 'Print Production Config'
       if: true
       run: |
         echo ${{ steps.cdApp.outputs.Config }}
-
     - name: Job Failed
       if: ${{ failure() && steps.getProdConfig.conclusion == 'failure' }}
       run: |
         echo 'Job Failed'
-
   task3-cms-content-sync:
     name: "3-Sync CMS Content"
     needs: [task2-cms-deploy]
-    if: $DeployToCMS  == 'true'
     runs-on: ubuntu-latest
     environment:
       name: Hotfix
@@ -118,15 +113,14 @@ jobs:
     - name: "User Selection"
       run: |
           echo "Environment : ${{ inputs.Environment }}"
-
   task4-vercel-preview-deploy:
     name: "4-Deploy to Vercel (Preview)"
     runs-on: ubuntu-latest
     needs: [task3-cms-content-sync]
     if: |
-      $DeployToVercel  == 'true' ||
-      (always() && needs.task3-cms-content-sync.result == 'success')
-
+      always() &&
+      github.event.inputs.DeployToVercel  == 'true' &&
+      (needs.task3-cms-content-sync.result == 'success')
     environment:
       name: HotfixNoApproval
       url: https://resideo-hotfix-preview.vercel.app/us/en/pro
@@ -135,7 +129,6 @@ jobs:
     - name: "Print Current Settings from Job1"
       run: |
           echo ${{ needs.deploy-to-cms.outputs.Config }}
-
 # Testing Preview site here
 
   task5-approve-deployment:
@@ -147,31 +140,27 @@ jobs:
     steps:
     - name: "User Selection"
       run: |
-          echo "Environment : $Environment"
-
+          echo "Environment : ${{ inputs.Environment }}"
   task6-swap-cms:
     name: "6-Promote CMS"
     needs: [task5-approve-deployment]
-    if: $DeployToCMS  == 'true'
     runs-on: ubuntu-latest
     environment:
       name: HotfixNoApproval
     steps:
     - name: "User Selection"
       run: |
-          echo "Environment : $Environment"
-
+          echo "Environment : ${{ inputs.Environment }}"
   task7-swap-vercel:
     name: "7-Promote Vercel"
     needs: [task6-swap-cms]
-    if: $DeployToVercel  == 'true'
     runs-on: ubuntu-latest
     environment:
       name: HotfixNoApproval
     steps:
     - name: "User Selection"
       run: |
-          echo "Environment : $Environment"
+          echo "Environment : ${{ inputs.Environment }}"
           
   task8-deployment-completed:
     name: "8-Deployment Successful"
@@ -182,7 +171,7 @@ jobs:
     steps:
     - name: "Deployment Successful"
       run: |
-          echo "$Environment Deployment Successful"
+          echo "${{ inputs.Environment }} Deployment Successful"
           
   task9-rollback-on-error:
     name: "9-Rollback On Error"
