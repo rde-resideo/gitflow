@@ -111,7 +111,7 @@ jobs:
     needs: [task2-cms-deploy]
     runs-on: ubuntu-latest
     environment:
-      name: Hotfix
+      name: HotfixNoApproval
     steps:
     - name: "User Selection"
       run: |
@@ -127,7 +127,7 @@ jobs:
       (needs.task3-cms-content-sync.result == 'success' || needs.task3-cms-content-sync.result == 'skipped')
 
     environment:
-      name: Hotfix
+      name: HotfixNoApproval
 
     steps:
     - name: "Print Current Settings from Job1"
@@ -137,7 +137,7 @@ jobs:
 # Testing Preview site here
 
   task5-approve-deployment:
-    name: "TASK 5 : Approve Deployment (Post Preview Site Testing)"
+    name: "TASK 5 : Validate Deployment & Approve"
     needs: [task4-vercel-preview-deploy]
     runs-on: ubuntu-latest
     environment:
@@ -152,7 +152,7 @@ jobs:
     needs: [task5-approve-deployment]
     runs-on: ubuntu-latest
     environment:
-      name: Hotfix
+      name: HotfixNoApproval
     steps:
     - name: "User Selection"
       run: |
@@ -163,7 +163,7 @@ jobs:
     needs: [task6-swap-cms]
     runs-on: ubuntu-latest
     environment:
-      name: Hotfix
+      name: HotfixNoApproval
     steps:
     - name: "User Selection"
       run: |
@@ -175,7 +175,7 @@ jobs:
     if: ${{ !cancelled() && ( failure() || needs.task7-swap-vercel.result == 'skipped') }}
     runs-on: ubuntu-latest
     environment:
-      name: Hotfix
+      name: HotfixNoApproval
 
     steps:
     - env:
