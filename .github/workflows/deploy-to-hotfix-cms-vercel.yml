@@ -179,9 +179,9 @@ jobs:
 
     steps:
     - env:
-       Config: ${{jobs.task2-cms-deploy.outputs.Config}}
-       PatchingStatus: ${{jobs.task2-cms-deploy.outputs.PatchingStatus}}
-       RestoreStatus: ${{jobs.task2-cms-deploy.outputs.RestoreStatus}}
+       Config: ${{needs.task2-cms-deploy.outputs.Config}}
+       PatchingStatus: ${{needs.task2-cms-deploy.outputs.PatchingStatus}}
+       RestoreStatus: ${{needs.task2-cms-deploy.outputs.RestoreStatus}}
       run: echo "Config:$Config, PatchingStatus:$PatchingStatus, RestoreStatus:$RestoreStatus"
     - name: "Rollback Reason"
       run: |
