@@ -71,6 +71,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       Config: ${{ steps.cdApp.outputs.Config }}
+      PatchingStatus: ${{ steps.cmConfigPatching.outputs.Status }}
+      RestoreStatus: ${{ steps.cmConfigRestore.outputs.Status }}
     environment:
       name: Hotfix
 
@@ -81,6 +83,18 @@ jobs:
       run: |
         #$configVal=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?contains('CurrentSettings', name)].{Value:value}"  -o tsv)
         echo "::set-output name=Config::'configValWeb'"
+        
+    - name: 'CM Config Patching Done'
+      if: true
+      id: cmConfigPatching
+      run: |
+        echo "::set-output name=Status::'true'"
+        
+    - name: 'CM Config Patching Done'
+      if: true
+      id: cmConfigRestore
+      run: |
+        echo "::set-output name=Status::'true'"
 
     - name: 'Print Production Config'
       if: true
@@ -157,12 +171,18 @@ jobs:
           
   task8-rollback-on-error:
     name: "TASK 8 : Rollback On Error"
-    needs: [task7-swap-vercel]
-    if: ${{ failure() }}
+    needs: [task2-cms-deploy, task7-swap-vercel]
+    #if: ${{ failure() }}
     runs-on: ubuntu-latest
     environment:
       name: Hotfix
+
     steps:
+    - env:
+       Config: ${{needs.task2-cms-deploy.outputs.Config}}
+       PatchingStatus: ${{needs.task2-cms-deploy.outputs.PatchingStatus}}
+       RestoreStatus: ${{needs.task2-cms-deploy.outputs.RestoreStatus}}
+      run: echo "Config:$Config, PatchingStatus:$PatchingStatus, RestoreStatus:$RestoreStatus"
     - name: "Rollback Reason"
       run: |
-          echo "Rollback Reason : ${{ inputs.Environment }}"
+          echo "Rollback Reason : ${{ inputs.Environment }} - $PatchingStatus"
