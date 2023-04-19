@@ -171,7 +171,7 @@ jobs:
           
   task8-rollback-on-error:
     name: "TASK 8 : Rollback On Error"
-    needs: [task2-cms-deploy]
+    #needs: [task2-cms-deploy]
     if: ${{ failure() }}
     runs-on: ubuntu-latest
     environment:
@@ -179,9 +179,9 @@ jobs:
 
     steps:
     - env:
-       Config: ${{needs.task2-cms-deploy.outputs.Config}}
-       PatchingStatus: ${{needs.task2-cms-deploy.outputs.PatchingStatus}}
-       RestoreStatus: ${{needs.task2-cms-deploy.outputs.RestoreStatus}}
+       Config: ${{jobs.task2-cms-deploy.outputs.Config}}
+       PatchingStatus: ${{jobs.task2-cms-deploy.outputs.PatchingStatus}}
+       RestoreStatus: ${{jobs.task2-cms-deploy.outputs.RestoreStatus}}
       run: echo "Config:$Config, PatchingStatus:$PatchingStatus, RestoreStatus:$RestoreStatus"
     - name: "Rollback Reason"
       run: |
