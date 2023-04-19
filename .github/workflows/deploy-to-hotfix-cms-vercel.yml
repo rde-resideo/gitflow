@@ -106,7 +106,7 @@ jobs:
     if: |
       always() &&
       github.event.inputs.DeployToVercel  == 'true' &&
-      (needs.job2-cms-deploy.result == 'success' || needs.job2-cms-deploy.result == 'skipped')
+      (needs.task2-cms-deploy.result == 'success' || needs.task2-cms-deploy.result == 'skipped')
 
     environment:
       name: Hotfix
