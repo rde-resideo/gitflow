@@ -96,6 +96,8 @@ jobs:
     name: "TASK 3 : Sync CMS Content"
     needs: [task2-cms-deploy]
     runs-on: ubuntu-latest
+    environment:
+      name: Hotfix
     steps:
     - name: "User Selection"
       run: |
@@ -120,10 +122,12 @@ jobs:
 
 # Testing Preview site here
 
-  task5-approve-reject-deployment:
+  task5-approve-deployment:
     name: "TASK 5 : Approve /Reject Deployment (Post Preview Site Testing)"
     needs: [task4-vercel-preview-deploy]
     runs-on: ubuntu-latest
+    environment:
+      name: Hotfix
     steps:
     - name: "User Selection"
       run: |
@@ -131,8 +135,10 @@ jobs:
 
   task6-swap-cms:
     name: "TASK 6 : Promote CMS Staging to Production"
-    needs: [task5-approve-reject-deployment]
+    needs: [task5-approve-deployment]
     runs-on: ubuntu-latest
+    environment:
+      name: Hotfix
     steps:
     - name: "User Selection"
       run: |
@@ -140,8 +146,10 @@ jobs:
 
   task7-swap-vercel:
     name: "TASK 7 : Promote Vercel Preview to Production"
-    needs: [task5-approve-reject-deployment]
+    needs: [task6-swap-cms]
     runs-on: ubuntu-latest
+    environment:
+      name: Hotfix
     steps:
     - name: "User Selection"
       run: |
@@ -152,6 +160,8 @@ jobs:
     needs: [task7-swap-vercel]
     if: ${{ failure() }}
     runs-on: ubuntu-latest
+    environment:
+      name: Hotfix
     steps:
     - name: "Rollback Reason"
       run: |
