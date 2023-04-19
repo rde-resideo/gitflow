@@ -150,7 +150,9 @@ jobs:
   task6-swap-cms:
     name: "6-Promote CMS"
     needs: [task5-approve-deployment]
-    if: ${{ github.event.inputs.DeployToCMS  == 'true' }}
+    if: |
+      always() &&
+      (github.event.inputs.DeployToCMS  == 'true')
     runs-on: ubuntu-latest
     environment:
       name: HotfixNoApproval
@@ -161,7 +163,9 @@ jobs:
   task7-swap-vercel:
     name: "7-Promote Vercel"
     needs: [task6-swap-cms]
-    if: ${{ github.event.inputs.DeployToVercel  == 'true' }}
+    if: |
+      always() &&
+      (github.event.inputs.DeployToVercel  == 'true')
     runs-on: ubuntu-latest
     environment:
       name: HotfixNoApproval
