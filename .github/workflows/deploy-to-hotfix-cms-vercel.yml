@@ -16,22 +16,22 @@ on:
         description: "Git Branch"
         options: 
         - hotfix
-      DeployToCMS:
-        description: "Deploy to Sitecore CMS"
-        type: boolean
-        default: true
-        required: true
-      DeployToVercel:
-        description: "Deploy to Vercel"
-        type: boolean
-        default: true
-        required: true
+#      DeployToCMS:
+#        description: "Deploy to Sitecore CMS"
+#        type: boolean
+#        default: true
+#        required: true
+#      DeployToVercel:
+#        description: "Deploy to Vercel"
+#        type: boolean
+#        default: true
+#        required: true
 
 env:
   Environment: ${{ inputs.Environment }}
   GitBranch: ${{ inputs.GitBranch }}
-  DeployToCMS: ${{ inputs.DeployToCMS }}
-  DeployToVercel: ${{ inputs.DeployToVercel }}
+  DeployToCMS: true      # ${{ inputs.DeployToCMS }}
+  DeployToVercel: true   # ${{ inputs.DeployToVercel }}
 
   APP_LOCATION: '/' # location of your client code
   GITHUB_CONTEXT: ${{ toJson(github) }}  
@@ -58,12 +58,13 @@ jobs:
       run: |
           echo "Environment : $Environment"
           echo "GitBranch : ${{ inputs.GitBranch }}"
-          echo "DeployToCMS : ${{ inputs.DeployToCMS }}"
-          echo "DeployToVercel : $DeployToVercel"
+          #echo "DeployToCMS : ${{ inputs.DeployToCMS }}"
+          #echo "DeployToVercel : $DeployToVercel"
+
   task2-cms-deploy:
     name: "2-Deploy to CMS (Staging)"   # Image Tagging, Deploy to Staging, CM Config Patching
     needs: [task1-print-inputs]
-    if: ${{ github.event.inputs.DeployToCMS  == 'true' }}
+    if: ${{ env.DeployToCMS  == 'true' }}   # Change 1
     permissions:
       contents: read # for actions/checkout to fetch code
       pull-requests: write # for Azure/static-web-apps-deploy to comment on PRs
@@ -106,7 +107,7 @@ jobs:
   task3-cms-content-sync:
     name: "3-Sync CMS Content"
     needs: [task2-cms-deploy]
-    if: ${{ github.event.inputs.DeployToCMS  == 'true' }}
+    if: ${{ env.DeployToCMS  == 'true' }}   # ${{ github.event.inputs.DeployToCMS  == 'true' }}
     runs-on: ubuntu-latest
     environment:
       name: Hotfix
@@ -121,7 +122,7 @@ jobs:
     needs: [task3-cms-content-sync]
     if: |
       always() &&
-      github.event.inputs.DeployToVercel  == 'true' &&
+      env.DeployToVercel  == 'true' &&
       (needs.task3-cms-content-sync.result == 'success' || needs.task3-cms-content-sync.result == 'skipped')
     environment:
       name: Hotfix
@@ -139,7 +140,7 @@ jobs:
     if: |
       always() &&
       !failure() &&
-      (github.event.inputs.DeployToCMS  == 'true' ||  github.event.inputs.DeployToVercel  == 'true')
+      (env.DeployToCMS  == 'true' ||  env.DeployToVercel  == 'true')
     runs-on: ubuntu-latest
     environment:
       name: Hotfix
@@ -154,7 +155,7 @@ jobs:
     if: |
       always() &&
       !failure() &&
-      (github.event.inputs.DeployToCMS  == 'true')
+      (env.DeployToCMS  == 'true')
     runs-on: ubuntu-latest
     environment:
       name: HotfixNoApproval
@@ -168,7 +169,7 @@ jobs:
     if: |
       always() &&
       !failure() &&
-      (github.event.inputs.DeployToVercel  == 'true')
+      (env.DeployToVercel  == 'true')
     runs-on: ubuntu-latest
     environment:
       name: HotfixNoApproval
@@ -184,8 +185,8 @@ jobs:
       always() &&
       !failure() &&
       (
-        (github.event.inputs.DeployToCMS  == 'true' && needs.task6-swap-cms.result == 'success') ||
-        (github.event.inputs.DeployToVercel  == 'true' && needs.task7-swap-vercel.result == 'success')
+        (env.DeployToCMS  == 'true' && needs.task6-swap-cms.result == 'success') ||
+        (env.DeployToVercel  == 'true' && needs.task7-swap-vercel.result == 'success')
       )
     runs-on: ubuntu-latest
     environment:
