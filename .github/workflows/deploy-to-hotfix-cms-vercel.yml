@@ -121,7 +121,7 @@ jobs:
     if: |
       always() &&
       github.event.inputs.DeployToVercel  == 'true' &&
-      (needs.task3-cms-content-sync.result == 'success')
+      (needs.task3-cms-content-sync.result == 'success' || needs.task3-cms-content-sync.result == 'skipped')
     environment:
       name: HotfixNoApproval
       url: https://resideo-hotfix-preview.vercel.app/us/en/pro
