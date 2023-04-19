@@ -51,10 +51,10 @@ permissions:
 
 jobs:
   Print-User-Inputs:
-    name: "User Selection"
+    name: "Print User Selection"
     runs-on: ubuntu-latest
     steps:
-    - name: "User Inputs"
+    - name: "User Selection"
       run: |
           echo "Environment : ${{ inputs.Environment }}"
           echo "GitBranch : ${{ inputs.GitBranch }}"
