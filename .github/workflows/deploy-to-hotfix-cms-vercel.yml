@@ -50,7 +50,7 @@ permissions:
     contents: read
 
 jobs:
-  Print-User-Inputs:
+  job1:
     name: "Print User Selection"
     runs-on: ubuntu-latest
     steps:
@@ -61,8 +61,8 @@ jobs:
           echo "DeployToCMS : ${{ inputs.DeployToCMS }}"
           echo "DeployToVercel : ${{ inputs.DeployToVercel }}"
 
-  deploy-to-cms:
-    name: "Deploy to Sitecore CMS"
+  job2-cms-deploy:
+    name: "Deploy to Staging CMS"   # Image Tagging, Deploy to Staging, CM Config Patching
     if: ${{ github.event.inputs.DeployToCMS  == 'true' }}
     permissions:
       contents: read # for actions/checkout to fetch code
@@ -91,14 +91,22 @@ jobs:
       run: |
         echo 'Job Failed'
 
-  deploy-to-vercel:
-    name: "Deploy to Vercel"
+  job3-cms-content-sync:
+    name: "Sync Content with CM"
     runs-on: ubuntu-latest
-    needs: [deploy-to-cms]
+    steps:
+    - name: "User Selection"
+      run: |
+          echo "Environment : ${{ inputs.Environment }}"
+
+  job4-vercel-preview-deploy:
+    name: "Deploy to Vercel Preview"
+    runs-on: ubuntu-latest
+    needs: [job2-cms-deploy]
     if: |
       always() &&
       github.event.inputs.DeployToVercel  == 'true' &&
-      (needs.deploy-to-cms.result == 'success' || needs.deploy-to-cms.result == 'skipped')
+      (needs.job2-cms-deploy.result == 'success' || needs.job2-cms-deploy.result == 'skipped')
 
     environment:
       name: Hotfix
@@ -108,3 +116,35 @@ jobs:
       run: |
           echo ${{ needs.deploy-to-cms.outputs.Config }}
 
+# Testing Preview site here
+
+  job5-approve-reject-deployment:
+    name: "Approve or Reject Deployment"
+    runs-on: ubuntu-latest
+    steps:
+    - name: "User Selection"
+      run: |
+          echo "Environment : ${{ inputs.Environment }}"
+
+  job6-swap-cms:
+    name: "job6-swap-cms"
+    runs-on: ubuntu-latest
+    steps:
+    - name: "User Selection"
+      run: |
+          echo "Environment : ${{ inputs.Environment }}"
+  job7-swap-vercel:
+    name: "job7-swap-vercel"
+    runs-on: ubuntu-latest
+    steps:
+    - name: "User Selection"
+      run: |
+          echo "Environment : ${{ inputs.Environment }}"
+          
+  job8-cancel-rollback-cm-configs:
+    name: "job8-cancel-rollback-cm-configs"
+    runs-on: ubuntu-latest
+    steps:
+    - name: "User Selection"
+      run: |
+          echo "Environment : ${{ inputs.Environment }}"
