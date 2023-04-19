@@ -195,11 +195,11 @@ jobs:
       RestoreStatus: ${{needs.task2-cms-deploy.outputs.RestoreStatus}}
     steps:
     - name: "Rollback CM Config"
-      if: ${{ $PatchingStatus == 'true' }}
+      if: ${{ env.PatchingStatus == 'true' }}
       run: |
           echo "Rollback $Environment CM Config changes"
     
     - name: "No Rollback Required"
-      if: ${{ $PatchingStatus != 'true' }}
+      if: ${{ env.PatchingStatus != 'true' }}
       run: |
           echo "No Rollback Required"
