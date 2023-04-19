@@ -107,11 +107,12 @@ jobs:
         echo 'Job Failed'
 
   task3-cms-content-sync:
-    name: "TASK 3 : Sync CMS Content"
+    name: "TASK 3 : Wait for CM - Sync CMS Content"
     needs: [task2-cms-deploy]
     runs-on: ubuntu-latest
     environment:
-      name: HotfixNoApproval
+      name: Hotfix
+      url: https://hauthor.prostore.resideo.com
     steps:
     - name: "User Selection"
       run: |
@@ -137,11 +138,12 @@ jobs:
 # Testing Preview site here
 
   task5-approve-deployment:
-    name: "TASK 5 : Validate Deployment & Approve"
+    name: "TASK 5 : Validate Preview Site & Approve Deployment"
     needs: [task4-vercel-preview-deploy]
     runs-on: ubuntu-latest
     environment:
       name: Hotfix
+      url: https://resideo-hotfix-preview.vercel.app/us/en/pro
     steps:
     - name: "User Selection"
       run: |
