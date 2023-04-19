@@ -149,7 +149,7 @@ jobs:
           echo "Environment : ${{ inputs.Environment }}"
 
   task6-swap-cms:
-    name: "6-Promote CMS"
+    name: "6-Promote CMS Staging to Production"
     needs: [task5-approve-deployment]
     if: |
       always() &&
@@ -163,7 +163,7 @@ jobs:
       run: |
           echo "Environment : ${{ inputs.Environment }}"
   task7-swap-vercel:
-    name: "7-Promote Vercel"
+    name: "7-Promote Vercel Preview to Production"
     needs: [task6-swap-cms]
     if: |
       always() &&
