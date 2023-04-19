@@ -153,6 +153,7 @@ jobs:
     needs: [task5-approve-deployment]
     if: |
       always() &&
+      !failure() &&
       (github.event.inputs.DeployToCMS  == 'true')
     runs-on: ubuntu-latest
     environment:
@@ -166,6 +167,7 @@ jobs:
     needs: [task6-swap-cms]
     if: |
       always() &&
+      !failure() &&
       (github.event.inputs.DeployToVercel  == 'true')
     runs-on: ubuntu-latest
     environment:
@@ -180,6 +182,7 @@ jobs:
     needs: [task6-swap-cms, task7-swap-vercel]
     if: |
       always() &&
+      !failure() &&
       (
         (github.event.inputs.DeployToCMS  == 'true' && needs.task6-swap-cms.result == 'success') ||
         (github.event.inputs.DeployToVercel  == 'true' && needs.task7-swap-vercel.result == 'success')
