@@ -185,7 +185,7 @@ jobs:
   task8-rollback-on-error:
     name: "8-Rollback On Error"
     needs: [task2-cms-deploy, task8-deployment-completed]
-    if: ${{ ( failure() && needs.task2-cms-deploy.outputs.PatchingStatus == 'true') }}
+    if: ${{ failure() }}
     runs-on: ubuntu-latest
     environment:
       name: HotfixNoApproval
@@ -197,5 +197,6 @@ jobs:
        RestoreStatus: ${{needs.task2-cms-deploy.outputs.RestoreStatus}}
       run: echo "Config:$Config, PatchingStatus:$PatchingStatus, RestoreStatus:$RestoreStatus"
     - name: "Rollback Reason"
+      #if: ${{ needs.task2-cms-deploy.outputs.PatchingStatus == 'true' }}
       run: |
-          echo "Rollback Reason : ${{ inputs.Environment }} - $PatchingStatus"
+          echo "Rollback Reason : ${{ inputs.Environment }}, PatchingStatus - $PatchingStatus"
