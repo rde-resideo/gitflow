@@ -51,7 +51,7 @@ permissions:
 
 jobs:
   task1-print-inputs:
-    name: "TASK 1 : Print User Selection"
+    name: "1-Print User Selection"
     runs-on: ubuntu-latest
     steps:
     - name: "User Selection"
@@ -62,7 +62,7 @@ jobs:
           echo "DeployToVercel : ${{ inputs.DeployToVercel }}"
 
   task2-cms-deploy:
-    name: "TASK 2 : Deploy to CMS (Staging)"   # Image Tagging, Deploy to Staging, CM Config Patching
+    name: "2-Deploy to CMS (Staging)"   # Image Tagging, Deploy to Staging, CM Config Patching
     needs: [task1-print-inputs]
     if: ${{ github.event.inputs.DeployToCMS  == 'true' }}
     permissions:
@@ -107,7 +107,7 @@ jobs:
         echo 'Job Failed'
 
   task3-cms-content-sync:
-    name: "TASK 3 : Wait for CM - Sync CMS Content"
+    name: "3-Wait for CM & Sync CMS Content"
     needs: [task2-cms-deploy]
     runs-on: ubuntu-latest
     environment:
@@ -119,7 +119,7 @@ jobs:
           echo "Environment : ${{ inputs.Environment }}"
 
   task4-vercel-preview-deploy:
-    name: "TASK 4 : Deploy to Vercel (Preview)"
+    name: "4-Deploy to Vercel (Preview)"
     runs-on: ubuntu-latest
     needs: [task3-cms-content-sync]
     if: |
@@ -138,7 +138,7 @@ jobs:
 # Testing Preview site here
 
   task5-approve-deployment:
-    name: "TASK 5 : Validate Preview Site & Approve Deployment"
+    name: "5-Validate Preview Site & Approve Deployment"
     needs: [task4-vercel-preview-deploy]
     runs-on: ubuntu-latest
     environment:
@@ -150,7 +150,7 @@ jobs:
           echo "Environment : ${{ inputs.Environment }}"
 
   task6-swap-cms:
-    name: "TASK 6 : Promote CMS Staging to Production"
+    name: "6-Promote CMS Staging to Production"
     needs: [task5-approve-deployment]
     runs-on: ubuntu-latest
     environment:
@@ -161,7 +161,7 @@ jobs:
           echo "Environment : ${{ inputs.Environment }}"
 
   task7-swap-vercel:
-    name: "TASK 7 : Promote Vercel Preview to Production"
+    name: "7-Promote Vercel Preview to Production"
     needs: [task6-swap-cms]
     runs-on: ubuntu-latest
     environment:
@@ -172,7 +172,7 @@ jobs:
           echo "Environment : ${{ inputs.Environment }}"
           
   task8-rollback-on-error:
-    name: "TASK 8 : Rollback On Error"
+    name: "8-Rollback On Error"
     needs: [task2-cms-deploy, task7-swap-vercel]
     if: ${{ !cancelled() && ( failure() || needs.task7-swap-vercel.result == 'skipped') }}
     runs-on: ubuntu-latest
