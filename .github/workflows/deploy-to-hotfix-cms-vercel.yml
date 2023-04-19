@@ -56,10 +56,10 @@ jobs:
     steps:
     - name: "User Selection"
       run: |
-          echo "Environment : ${{ inputs.Environment }}"
+          echo "Environment : $Environment"
           echo "GitBranch : ${{ inputs.GitBranch }}"
           echo "DeployToCMS : ${{ inputs.DeployToCMS }}"
-          echo "DeployToVercel : ${{ inputs.DeployToVercel }}"
+          echo "DeployToVercel : $DeployToVercel"
 
   task2-cms-deploy:
     name: "2-Deploy to CMS (Staging)"   # Image Tagging, Deploy to Staging, CM Config Patching
@@ -199,4 +199,4 @@ jobs:
     - name: "Rollback Reason"
       #if: ${{ needs.task2-cms-deploy.outputs.PatchingStatus == 'true' }}
       run: |
-          echo "Rollback Reason : ${{ inputs.Environment }}, PatchingStatus - $PatchingStatus"
+          echo "Rollback deployment for : $Environment, PatchingStatus - ${{needs.task2-cms-deploy.outputs.PatchingStatus}}"
