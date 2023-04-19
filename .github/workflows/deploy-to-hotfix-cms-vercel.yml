@@ -125,7 +125,7 @@ jobs:
     if: |
       always() &&
       github.event.inputs.DeployToVercel  == 'true' &&
-      (needs.task3-cms-content-sync.result == 'success' || needs.task3-cms-content-sync.result == 'skipped')
+      (needs.task3-cms-content-sync.result == 'success')
 
     environment:
       name: HotfixNoApproval
