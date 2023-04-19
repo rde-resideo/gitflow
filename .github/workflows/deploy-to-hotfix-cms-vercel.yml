@@ -120,8 +120,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [task3-cms-content-sync]
     if: |
-      always() &&
-      (needs.task3-cms-content-sync.result == 'success' || needs.task3-cms-content-sync.result == 'skipped')
+      always() && (needs.task3-cms-content-sync.result == 'success')
     environment:
       name: Hotfix
       url: https://resideo-hotfix-preview.vercel.app/us/en/pro
