@@ -110,7 +110,7 @@ jobs:
   task3-cms-content-sync:
     name: "3-Sync CMS Content"
     needs: [task2-cms-deploy]
-    if: ${{ env.DeployToCMS  == 'true' }}
+    if: env.DeployToCMS  == 'true'
     runs-on: ubuntu-latest
     environment:
       name: Hotfix
@@ -152,7 +152,7 @@ jobs:
   task6-swap-cms:
     name: "6-Promote CMS"
     needs: [task5-approve-deployment]
-    if: ${{ env.DeployToCMS  == 'true' }}
+    if: env.DeployToCMS  == 'true'
     runs-on: ubuntu-latest
     environment:
       name: HotfixNoApproval
@@ -164,7 +164,7 @@ jobs:
   task7-swap-vercel:
     name: "7-Promote Vercel"
     needs: [task6-swap-cms]
-    if: ${{ env.DeployToVercel  == 'true' }}
+    if: env.DeployToVercel  == 'true'
     runs-on: ubuntu-latest
     environment:
       name: HotfixNoApproval
