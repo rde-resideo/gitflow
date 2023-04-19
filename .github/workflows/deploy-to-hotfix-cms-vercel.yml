@@ -121,7 +121,6 @@ jobs:
     needs: [task3-cms-content-sync]
     if: |
       always() &&
-      #github.event.inputs.DeployToVercel  == 'true' &&
       (needs.task3-cms-content-sync.result == 'success' || needs.task3-cms-content-sync.result == 'skipped')
     environment:
       name: Hotfix
@@ -137,9 +136,7 @@ jobs:
     name: "5-Validate Preview Deployment"
     needs: [task4-vercel-preview-deploy]
     if: |
-      always() &&
-      !failure() #&&
-      #(github.event.inputs.DeployToCMS  == 'true' ||  github.event.inputs.DeployToVercel  == 'true')
+      always() && !failure() 
     runs-on: ubuntu-latest
     environment:
       name: Hotfix
@@ -152,9 +149,7 @@ jobs:
     name: "6-Promote CMS Staging to Production"
     needs: [task5-approve-deployment]
     if: |
-      always() &&
-      !failure() #&&
-      #(github.event.inputs.DeployToCMS  == 'true')
+      always() && !failure()
     runs-on: ubuntu-latest
     environment:
       name: HotfixNoApproval
@@ -166,9 +161,7 @@ jobs:
     name: "7-Promote Vercel Preview to Production"
     needs: [task6-swap-cms]
     if: |
-      always() &&
-      !failure() #&&
-      #(github.event.inputs.DeployToVercel  == 'true')
+      always() && !failure()
     runs-on: ubuntu-latest
     environment:
       name: HotfixNoApproval
@@ -181,12 +174,7 @@ jobs:
     name: "8-Deployment Successful"
     needs: [task6-swap-cms, task7-swap-vercel]
     if: |
-      always() &&
-      !failure() #&&
-      #(
-       # (github.event.inputs.DeployToCMS  == 'true' && needs.task6-swap-cms.result == 'success') ||
-       # (github.event.inputs.DeployToVercel  == 'true' && needs.task7-swap-vercel.result == 'success')
-      #)
+      always() && !failure()
     runs-on: ubuntu-latest
     environment:
       name: HotfixNoApproval
