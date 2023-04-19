@@ -114,6 +114,7 @@ jobs:
     - name: "User Selection"
       run: |
           echo "Environment : ${{ inputs.Environment }}"
+
   task4-vercel-preview-deploy:
     name: "4-Deploy to Vercel (Preview)"
     runs-on: ubuntu-latest
@@ -123,7 +124,7 @@ jobs:
       github.event.inputs.DeployToVercel  == 'true' &&
       (needs.task3-cms-content-sync.result == 'success' || needs.task3-cms-content-sync.result == 'skipped')
     environment:
-      name: HotfixNoApproval
+      name: Hotfix
       url: https://resideo-hotfix-preview.vercel.app/us/en/pro
 
     steps:
@@ -135,6 +136,9 @@ jobs:
   task5-approve-deployment:
     name: "5-Validate Preview Deployment"
     needs: [task4-vercel-preview-deploy]
+    if: |
+      always() &&
+      (github.event.inputs.DeployToCMS  == 'true' ||  github.event.inputs.DeployToVercel  == 'true')
     runs-on: ubuntu-latest
     environment:
       name: Hotfix
@@ -142,6 +146,7 @@ jobs:
     - name: "User Selection"
       run: |
           echo "Environment : ${{ inputs.Environment }}"
+
   task6-swap-cms:
     name: "6-Promote CMS"
     needs: [task5-approve-deployment]
