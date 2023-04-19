@@ -51,7 +51,7 @@ permissions:
 
 jobs:
   Print-User-Inputs:
-    name: "Print User Inputs"
+    name: "User Selection"
     runs-on: ubuntu-latest
     steps:
     - name: "User Inputs"
