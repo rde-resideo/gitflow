@@ -89,13 +89,13 @@ jobs:
       if: true
       id: cmConfigPatching
       run: |
-        echo "::set-output name=Status::'true'"
+        echo "::set-output name=Status::true"
         
     - name: 'CM Config Patching Done'
       if: true
       id: cmConfigRestore
       run: |
-        echo "::set-output name=Status::'true'"
+        echo "::set-output name=Status::true"
 
     - name: 'Print Production Config'
       if: true
@@ -182,21 +182,27 @@ jobs:
       run: |
           echo "${{ inputs.Environment }} Deployment Successful"
           
-  task8-rollback-on-error:
-    name: "8-Rollback On Error"
+  task9-rollback-on-error:
+    name: "9-Rollback On Error"
     needs: [task2-cms-deploy, task8-deployment-completed]
     if: ${{ failure() }}
     runs-on: ubuntu-latest
     environment:
       name: HotfixNoApproval
-
+    env:
+      Config: ${{needs.task2-cms-deploy.outputs.Config}}
+      PatchingStatus: ${{needs.task2-cms-deploy.outputs.PatchingStatus}}
+      RestoreStatus: ${{needs.task2-cms-deploy.outputs.RestoreStatus}}
     steps:
-    - env:
-       Config: ${{needs.task2-cms-deploy.outputs.Config}}
-       PatchingStatus: ${{needs.task2-cms-deploy.outputs.PatchingStatus}}
-       RestoreStatus: ${{needs.task2-cms-deploy.outputs.RestoreStatus}}
+    - name: "Print Task2 Outputs"       
       run: echo "Config:$Config, PatchingStatus:$PatchingStatus, RestoreStatus:$RestoreStatus"
-    - name: "Rollback Reason"
-      #if: ${{ needs.task2-cms-deploy.outputs.PatchingStatus == 'true' }}
+
+    - name: "Rollback CM Config"
+      if: ${{ needs.task2-cms-deploy.outputs.PatchingStatus == 'true' }}
       run: |
           echo "Rollback deployment for : $Environment, PatchingStatus - ${{needs.task2-cms-deploy.outputs.PatchingStatus}}"
+    
+    - name: "No Rollback Required"
+      if: ${{ needs.task2-cms-deploy.outputs.PatchingStatus != 'true' }}
+      run: |
+          echo "No Rollback Required for : $Environment, PatchingStatus - ${{needs.task2-cms-deploy.outputs.PatchingStatus}}"
