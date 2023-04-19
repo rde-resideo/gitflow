@@ -50,6 +50,17 @@ permissions:
     contents: read
 
 jobs:
+  Print-User-Inputs:
+    name: "Print User Inputs"
+    runs-on: ubuntu-latest
+    steps:
+    - name: "User Inputs"
+      run: |
+          echo "Environment : ${{ inputs.Environment }}"
+          echo "GitBranch : ${{ inputs.GitBranch }}"
+          echo "DeployToCMS : ${{ inputs.DeployToCMS }}"
+          echo "DeployToVercel : ${{ inputs.DeployToVercel }}"
+
   deploy-to-cms:
     name: "Deploy to Sitecore CMS"
     if: ${{ github.event.inputs.DeployToCMS  == 'true' }}
