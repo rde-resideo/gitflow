@@ -138,6 +138,7 @@ jobs:
     needs: [task4-vercel-preview-deploy]
     if: |
       always() &&
+      !failure() &&
       (github.event.inputs.DeployToCMS  == 'true' ||  github.event.inputs.DeployToVercel  == 'true')
     runs-on: ubuntu-latest
     environment:
