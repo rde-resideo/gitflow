@@ -90,7 +90,7 @@ jobs:
         
         $allConfigs=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" )
         #echo "$allConfigs"
-        echo ${{ fromJSON("$allConfigs") }}
+        echo ${{ $allConfigs }}
         
     - name: 'Read Production CM Config'
       id: Secrets
