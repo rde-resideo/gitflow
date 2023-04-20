@@ -72,16 +72,20 @@ jobs:
       shell: pwsh
       id: Configs
       run: |
-        $configVal=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?contains('CurrentSettings', name)].{Value:value}"  -o tsv)
+        $configVal=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?name == 'CurrentSettings'].{Value:value}"  -o tsv)
+        echo "$configVal"
         echo "::set-output name=Config::$configVal"
         
-        $cmWeb=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?contains('Sitecore_ConnectionStrings_Web', name)].{Value:value}"  -o tsv)
+        $cmWeb=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?name == 'Sitecore_ConnectionStrings_Web'].{Value:value}"  -o tsv)
+        echo "$cmWeb"
         echo "::set-output name=CMWebDB::$cmWeb"
         
-        $CMWebCUDB=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?contains('Sitecore_ConnectionStrings_WebCU', name)].{Value:value}"  -o tsv)
+        $CMWebCUDB=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?name == 'Sitecore_ConnectionStrings_WebCU'].{Value:value}"  -o tsv)
+        echo "$CMWebCUDB"
         echo "::set-output name=CMWebCUDB::$CMWebCUDB"
         
-        $cmSolrUrl=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?contains('Sitecore_ConnectionStrings_Solr.Search', name)].{Value:value}"  -o tsv)
+        $cmSolrUrl=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?name == 'Sitecore_ConnectionStrings_Solr.Search'].{Value:value}"  -o tsv)
+        echo "$cmSolrUrl"
         echo "::set-output name=CMSolrUrl::$cmSolrUrl"
         
     - name: 'Read Production CM Config'
