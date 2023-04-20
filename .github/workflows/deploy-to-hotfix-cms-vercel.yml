@@ -35,7 +35,7 @@ env:
   SITECORE_CLI_CLIENT_SECRET: ${{ secrets.HF_SITECORE_CLI_CLIENT_SECRET }}  
   GRAPHQL_PERSISTED_QUERIES_AUTH_TOKEN: ${{ secrets.HF_GRAPHQL_PERSISTED_QUERIES_AUTH_TOKEN }}
   
-  NEW_IMAGE_TAG: ${{ substring(github.sha,7) }} # ${{ github.run_id }} | $("${{ github.sha }}".SubString(0, 7)) | ${GITHUB_SHA::7}
+  NEW_IMAGE_TAG: ${{ github.sha }} # ${{ github.run_id }} | $("${{ github.sha }}".SubString(0, 7)) | ${GITHUB_SHA::7}
   CDImageWithTag: ${{ secrets.REGISTRY_URI }}/${{ secrets.HF_ACR_CD_IMAGE }}:${{ github.sha }}
   CMImageWithTag: ${{ secrets.REGISTRY_URI }}/${{ secrets.HF_ACR_CM_IMAGE }}:${{ github.sha }}
   IDImageWithTag: ${{ secrets.REGISTRY_URI }}/${{ secrets.HF_ACR_ID_IMAGE }}:${{ github.sha }}
