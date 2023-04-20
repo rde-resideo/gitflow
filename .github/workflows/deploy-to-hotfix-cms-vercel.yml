@@ -1,6 +1,5 @@
 name: deploy-to-hotfix-cms-vercel
 # **What it does**: On manual trigger, it deploys hotfix branch code to Hotfix environment both for Sitecore CMS and Vercel.
-
 on:
   workflow_dispatch:
     inputs:
@@ -16,115 +15,130 @@ on:
         description: "Git Branch"
         options: 
         - hotfix
-
 env:
   Environment: ${{ inputs.Environment }}
   GitBranch: ${{ inputs.GitBranch }}
-  DeployToCMS: true # ${{ inputs.DeployToCMS }}
-  DeployToVercel: true # ${{ inputs.DeployToVercel }}
-  NEW_IMAGE_TAG2: ${{ github.run_id }}
 
-  APP_LOCATION: '/' # location of your client code
-  GITHUB_CONTEXT: ${{ toJson(github) }}  
-  ACR_CD_IMAGE: ${{ secrets.REGISTRY_URI }}/${{ secrets.ACR_CD_IMAGE }}
-  ACR_CM_IMAGE: ${{ secrets.REGISTRY_URI }}/${{ secrets.ACR_CM_IMAGE }}
-  ACR_ID_IMAGE: ${{ secrets.REGISTRY_URI }}/${{ secrets.ACR_ID_IMAGE }}
-  NEW_IMAGE_TAG: $("${{ github.sha }}".SubString(0, 7))
-  
+  APP_LOCATION: '/' 
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.HF_VERCEL_PROJECT_ID }}
+  VERCEL_TOKEN : ${{ secrets.VERCEL_TOKEN  }}
   NPM_PKG_GITHUB_AUTH_TOKEN: ${{ secrets.NPM_PKG_GITHUB_AUTH_TOKEN }}
-  GRAPHQL_PERSISTED_QUERIES_AUTH_TOKEN: ${{ secrets.GRAPHQL_PERSISTED_QUERIES_AUTH_TOKEN }}
-  # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  VAR1Value: ${{ vars.hotfixappvar }}
+  
+  ACR_CD_IMAGE: ${{ secrets.REGISTRY_URI }}/${{ secrets.HF_ACR_CD_IMAGE }}
+  ACR_CM_IMAGE: ${{ secrets.REGISTRY_URI }}/${{ secrets.HF_ACR_CM_IMAGE }}
+  ACR_ID_IMAGE: ${{ secrets.REGISTRY_URI }}/${{ secrets.HF_ACR_ID_IMAGE }}
+  
+  ID_URL: ${{ secrets.HF_ID_URL }}
+  CM_URL: ${{ secrets.HF_CM_URL }}  
+  CM_CONTENT_PACKAGE: ${{ secrets.HF_CM_CONTENT_PACKAGE }}
+  SITECORE_CLI_CLIENT_SECRET: ${{ secrets.HF_SITECORE_CLI_CLIENT_SECRET }}  
+  GRAPHQL_PERSISTED_QUERIES_AUTH_TOKEN: ${{ secrets.HF_GRAPHQL_PERSISTED_QUERIES_AUTH_TOKEN }}
+  
+  NEW_IMAGE_TAG: ${GITHUB_SHA::7} #${{ github.run_id }} #$("${{ github.sha }}".SubString(0, 7))
+  CDImageWithTag: ${{ secrets.REGISTRY_URI }}/${{ secrets.HF_ACR_CD_IMAGE }}:${{ GITHUB_SHA::7 }}
+  CMImageWithTag: ${{ secrets.REGISTRY_URI }}/${{ secrets.HF_ACR_CM_IMAGE }}:${{ GITHUB_SHA::7 }}
+  IDImageWithTag: ${{ secrets.REGISTRY_URI }}/${{ secrets.HF_ACR_ID_IMAGE }}:${{ GITHUB_SHA::7 }}
+
 
 permissions:
     contents: read
 
 jobs:
   deployment-configs:
-    name: "1-Print User Selection"
-    runs-on: ubuntu-latest
+    name: "1-Approve Hotfix Deployment"
+    runs-on: prostore-actions-runner
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      pull-requests: write # for Azure/static-web-apps-deploy to comment on PRs
     outputs:
-      Config: ${{ steps.Configs.outputs.Config }}
-      CMWebDB: ${{ steps.Configs.outputs.CMWebDB }}
-      CMWebCUDB: ${{ steps.Configs.outputs.CMWebCUDB }}
-      CMSolrUrl: ${{ steps.Configs.outputs.CMSolrUrl }}
-      ACRImage: ${{ steps.Secrets.outputs.ACRImage }}
-      VAR1: ${{ steps.Secrets.outputs.VAR1 }}
-      PatchingStatus: ${{ steps.cmConfigPatching.outputs.Status }}
-      RestoreStatus: ${{ steps.cmConfigRestore.outputs.Status }}
+      #CMWebDB: ${{ steps.Configs.outputs.CMWebDB }}
+      #CMWebCUDB: ${{ steps.Configs.outputs.CMWebCUDB }}
+      #CMSolrUrl: ${{ steps.Configs.outputs.CMSolrUrl }}
+
+      CDSetting: ${{ steps.Configs.outputs.CDSetting }}
+      CDStagingImage: ${{ steps.Configs.outputs.CDStagingImage }}
+      CMImage: ${{ steps.Configs.outputs.CMImage }}
+      IDImage: ${{ steps.Configs.outputs.IDImage }}
+      NewImageTag: ${{ steps.Configs.outputs.NewImageTag }}
 
     environment:
       name: Hotfix
       url: https://hauthor.prostore.resideo.com
     steps:
+    
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.GitBranch }}
+        fetch-depth: 0
 
     - name: "Login To Azure"
       uses: azure/login@v1
       with:
-        creds: ${{ secrets.AZURE_AD_SP }}
-
-    - name: "Read Production Current State"
-      run: |
-          echo "Environment : $Environment"
-          echo "GitBranch : ${{ inputs.GitBranch }}"
-          echo "NEW_IMAGE_TAG3 : $NEW_IMAGE_TAG2"
+        creds: ${{ secrets.HF_AZURE_AD_SP }}
 
     - name: 'Read Production Configs'
-      shell: pwsh
+      #shell: pwsh
       id: Configs
       run: |
-        $configVal=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?name == 'CurrentSettings'].{Value:value}"  -o tsv)
-        echo "$configVal"
-        #echo "::set-output name=Config::$configVal"
-        echo "Config=$configVal" >> $GITHUB_OUTPUT
+        $CDSetting=$(az webapp config appsettings list --name ${{ secrets.HF_AZ_CD_APP_NAME }} --resource-group ${{ secrets.HF_AZ_RG_NAME }} --query "[?name == 'CurrentSettings'].{Value:value}"  -o tsv)
+        echo "CDSetting=$CDSetting" >> $GITHUB_OUTPUT
         
-        $cmWeb=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?name == 'Sitecore_ConnectionStrings_Web'].{Value:value}"  -o tsv)
-        echo "$cmWeb"
-        #echo "::set-output name=CMWebDB::$cmWeb"
-        echo "CMWebDB=$cmWeb" >> $GITHUB_OUTPUT
+        $CMWebDB=$(az webapp config appsettings list --name ${{ secrets.HF_AZ_CM_APP_NAME }} --resource-group ${{ secrets.HF_AZ_RG_NAME }} --query "[?name == 'Sitecore_ConnectionStrings_Web'].{Value:value}"  -o tsv)
+        echo "CMWebDB=$CMWebDB" >> $GITHUB_OUTPUT
         
-        $CMWebCUDB=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?name == 'Sitecore_ConnectionStrings_WebCU'].{Value:value}"  -o tsv)
-        echo "$CMWebCUDB"
-        #echo "::set-output name=CMWebCUDB::$CMWebCUDB"
+        $CMWebCUDB=$(az webapp config appsettings list --name ${{ secrets.HF_AZ_CM_APP_NAME }} --resource-group ${{ secrets.HF_AZ_RG_NAME }} --query "[?name == 'Sitecore_ConnectionStrings_WebCU'].{Value:value}"  -o tsv)
         echo "CMWebCUDB=$CMWebCUDB" >> $GITHUB_OUTPUT
         
-        $cmSolrUrl=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?name == 'Sitecore_ConnectionStrings_Solr.Search'].{Value:value}"  -o tsv)
-        echo "$cmSolrUrl"
-        #echo "::set-output name=CMSolrUrl::$cmSolrUrl"
-        echo "CMSolrUrl=$cmSolrUrl" >> $GITHUB_OUTPUT
-                
-    - name: 'Read Production CM Config'
-      id: Secrets
-      run: |
-        echo "::set-output name=ACR_CD_IMAGE::${{ secrets.ACR_CD_IMAGE }}"
-        echo "::set-output name=VAR1::${{ vars.VAR1 }}"
+        $CMSolrUrl=$(az webapp config appsettings list --name ${{ secrets.HF_AZ_CM_APP_NAME }} --resource-group ${{ secrets.HF_AZ_RG_NAME }} --query "[?name == 'Sitecore_ConnectionStrings_Solr.Search'].{Value:value}"  -o tsv)
+        echo "CMSolrUrl=$CMSolrUrl" >> $GITHUB_OUTPUT
         
-    - name: 'CM Config Patching Done'
-      if: true
-      id: cmConfigPatching
-      run: |
-        echo "::set-output name=Status::true"
+        $CDStagingImage=$(az webapp config container show --name ${{ secrets.HF_AZ_CD_APP_NAME }} --resource-group ${{ secrets.HF_AZ_RG_NAME }} -s ${{ secrets.HF_AZ_CD_STAGING_APP_NAME }} --query "[?name == 'DOCKER_CUSTOM_IMAGE_NAME'].{Value:value}"  -o tsv)
+        echo "CDStagingImage=$CDStagingImage" >> $GITHUB_OUTPUT
         
-    - name: 'CM Config Patching Done'
-      if: true
-      id: cmConfigRestore
+        $CMImage=$(az webapp config container show --name ${{ secrets.HF_AZ_CM_APP_NAME }} --resource-group ${{ secrets.HF_AZ_RG_NAME }} --query "[?name == 'DOCKER_CUSTOM_IMAGE_NAME'].{Value:value}"  -o tsv)
+        echo "CMImage=$CMImage" >> $GITHUB_OUTPUT
+        
+        $IDImage=$(az webapp config container show --name ${{ secrets.HF_AZ_CM_APP_NAME }} --resource-group ${{ secrets.HF_AZ_RG_NAME }} --query "[?name == 'DOCKER_CUSTOM_IMAGE_NAME'].{Value:value}"  -o tsv)
+        echo "IDImage=$IDImage" >> $GITHUB_OUTPUT
+        
+        echo "NewImageTag=${{ env.NEW_IMAGE_TAG }}" >> $GITHUB_OUTPUT
+
+    - name: "Set Blob Path"
       run: |
-        echo "::set-output name=Status::true"
-    - name: 'Print Production Config'
+          "ArtifactPath=${{ github.repository }}/${{ github.head_ref || github.ref_name }}/$(Get-Date -Format 'MM-dd-yyyy')/$("${{ github.sha }}".SubString(0, 7))" >> $env:GITHUB_ENV
+          cp ".env.example" ".env"
+
+    - name: "Login To Docker"
       if: false
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.REGISTRY_URI }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    - name: "Build Image and Push"
+      id: ACRNewImages
       run: |
-        echo ${{ steps.cdApp.outputs.Config }}
-    - name: Job Failed
-      if: ${{ failure() && steps.getProdConfig.conclusion == 'failure' }}
-      run: |
-        echo 'Job Failed'
+          docker compose build
+          docker tag ${{ secrets.LOCAL_CD_IMAGE }}:latest ${{ env.CDImageWithTag }}
+          docker tag ${{ secrets.LOCAL_CD_IMAGE }}:latest ${{ env.ACR_CD_IMAGE }}:latest
+          docker tag ${{ secrets.LOCAL_CM_IMAGE }}:latest ${{ env.CMImageWithTag }}
+          docker tag ${{ secrets.LOCAL_CM_IMAGE }}:latest ${{ env.ACR_CM_IMAGE }}:latest
+          docker tag ${{ secrets.LOCAL_ID_IMAGE }}:latest ${{ env.IDImageWithTag }}
+          docker tag ${{ secrets.LOCAL_ID_IMAGE }}:latest ${{ env.ACR_ID_IMAGE }}:latest
+          
+          docker push ${{ env.CDImageWithTag }}
+          docker push ${{ env.ACR_CD_IMAGE }}:latest
+          docker push ${{ env.CMImageWithTag }}
+          docker push ${{ env.ACR_CM_IMAGE }}:latest
+          docker push ${{ env.IDImageWithTag }}
+          docker push ${{ env.ACR_ID_IMAGE }}:latest
 
   task2-cms-deploy:
     name: "2-Deploy to CMS (Staging)"   # Image Tagging, Deploy to Staging, CM Config Patching
     needs: [deployment-configs]
-    if: true # ${{ github.event.inputs.DeployToCMS  == 'true' }}
+    if: true
     permissions:
       contents: read # for actions/checkout to fetch code
       pull-requests: write # for Azure/static-web-apps-deploy to comment on PRs
@@ -134,45 +148,66 @@ jobs:
       CMWebDB: ${{ needs.deployment-configs.outputs.CMWebDB }}
       CMWebCUDB: ${{ needs.deployment-configs.outputs.CMWebCUDB }}
       CMSolrUrl: ${{ needs.deployment-configs.outputs.CMSolrUrl }}
-      ACRImage: ${{ needs.deployment-configs.outputs.ACRImage }}
-      AllConfigs: ${{ needs.deployment-configs.outputs.CMSolrUrl}}
-      VAR1: ${{needs.deployment-configs.outputs.VAR1 }}
-      PatchingStatus: ${{needs.deployment-configs.outputs.PatchingStatus}}
-      RestoreStatus: ${{needs.deployment-configs.outputs.RestoreStatus}}
+    outputs:
+      CMPatchingDone: ${{ steps.CMPatching.outputs.Status }}
     steps:
-    - name: 'Read Production Config'
-      run: |
-        echo ${{ needs.deployment-configs.outputs.AllConfigs }}
-        echo "$Config"
-        echo "$CMWebDB"
-        echo "$CMWebCUDB"
-        echo "$CMSolrUrl"
-        echo "$ACRImage"
-        echo "$VAR1"
 
-    - name: 'VAR1 Value'
-      run: |
-        echo "VAR1Value : $VAR1Value"
+    - name: "Login To Azure"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.HF_AZURE_AD_SP }}
 
-    - name: 'CM Config Patching Done'
-      if: true
-      id: cmConfigPatching
+    - name: "Deploy To CM with Staging config"
+      if: ${{ steps.cdApp.outputs.Config  == 'Web' }}
+      uses: azure/appservice-settings@v1
+      with:
+        app-name: ${{ secrets.HF_AZ_CM_APP_NAME }}
+        images: ${{ env.CMImageWithTag }}
+        app-settings-json: '${{ secrets.HF_StagingConfigs }}'
+
+    - name: "Deploy To CM with Web config"
+      if: ${{ steps.cdApp.outputs.Config  == 'Staging' }}
+      uses: azure/appservice-settings@v1
+      with:
+        app-name: ${{ secrets.HF_AZ_CM_APP_NAME }}
+        images: ${{ env.CMImageWithTag }}
+        app-settings-json: '${{ secrets.HF_WebConfigs }}'
+
+    - name: "Deploy To ID"
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ secrets.HF_AZ_ID_APP_NAME }}
+        images: ${{ env.IDImageWithTag }}
+        
+    - name: "Deploy To EU2 CD-Staging"
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ secrets.HF_AZ_CD_APP_NAME }}
+        slot-name: ${{ secrets.HF_AZ_CD_STAGING_APP_NAME }}
+        images: ${{ env.CDImageWithTag }}
+
+    - name: "Deploy To CU CD-Staging"
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ secrets.HF_AZ_CD_APP_NAME_CU }}
+        slot-name: ${{ secrets.HF_AZ_CD_STAGING_APP_NAME_CU }}
+        images: ${{ env.CDImageWithTag }}
+
+    - name: "Start Staging Slots (EU2, CU)"
       run: |
-        echo "::set-output name=Status::true"
+        az webapp start -g ${{ secrets.HF_AZ_RG_NAME }} -n ${{ secrets.HF_AZ_CD_APP_NAME }} -s ${{ secrets.HF_AZ_CD_STAGING_APP_NAME }}
+        az webapp start -g ${{ secrets.HF_AZ_RG_NAME_CU }} -n ${{ secrets.HF_AZ_CD_APP_NAME_CU }} -s ${{ secrets.HF_AZ_CD_STAGING_APP_NAME_CU }}
+
+    - name: "Logout From Azure"
+      run: |
+        az logout
         
     - name: 'CM Config Patching Done'
       if: true
-      id: cmConfigRestore
+      id: CMPatching
       run: |
-        echo "::set-output name=Status::true"
-    - name: 'Print Production Config'
-      if: true
-      run: |
-        echo ${{ steps.cdApp.outputs.Config }}
-    - name: Job Failed
-      if: ${{ failure() && steps.getProdConfig.conclusion == 'failure' }}
-      run: |
-        echo 'Job Failed'
+        echo "Status=true" >> $GITHUB_OUTPUT
+
   task3-cms-content-sync:
     name: "3-Sync CMS Content"
     needs: [task2-cms-deploy]
@@ -181,9 +216,23 @@ jobs:
     environment:
       name: Hotfix
     steps:
-    - name: "User Selection"
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.GitBranch }}
+        fetch-depth: 0
+
+    - name: "Sync Sitecore Content and Publish"
+      continue-on-error: true
       run: |
-          echo "Environment : ${{ inputs.Environment }}"
+          dotnet tool restore
+          dotnet new tool-manifest
+          dotnet sitecore ser pkg create -o ${{ env.CM_CONTENT_PACKAGE }}
+          dotnet sitecore login --client-credentials true --auth ${{ env.ID_URL }} --cm ${{ env.CM_URL }} --allow-write true --client-id SitecoreCLIServer --client-secret ${{ env.SITECORE_CLI_CLIENT_SECRET }}
+          dotnet sitecore ser package install --package ${{ env.CM_CONTENT_PACKAGE }}.itempackage --cm ${{ env.CM_URL }} --client-id SitecoreCLIServer --client-secret ${{ env.SITECORE_CLI_CLIENT_SECRET }} -i InitItems
+          dotnet sitecore ser package install --package ${{ env.CM_CONTENT_PACKAGE }}.itempackage --cm ${{ env.CM_URL }} --client-id SitecoreCLIServer --client-secret ${{ env.SITECORE_CLI_CLIENT_SECRET }} -i Resideo
+          dotnet sitecore ser package install --package ${{ env.CM_CONTENT_PACKAGE }}.itempackage --cm ${{ env.CM_URL }} --client-id SitecoreCLIServer --client-secret ${{ env.SITECORE_CLI_CLIENT_SECRET }} -i Resideo-Content
+          dotnet sitecore plugin add -n Sitecore.DevEx.Extensibility.Publishing --version 4.1.0
+          dotnet sitecore publish
 
   task4-vercel-preview-deploy:
     name: "4-Deploy to Vercel (Preview)"
@@ -196,18 +245,103 @@ jobs:
       url: https://resideo-hotfix-preview.vercel.app/us/en/pro
 
     steps:
-    - name: "Print Current Settings from Job1"
-      run: |
-          echo ${{ needs.task2-cms-deploy.outputs.Config }}
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.GitBranch }}
+        fetch-depth: 0
 
-    - name: 'VAR1 Value'
+    - name: "Get Current Date"
+      id: today
+      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
+    - name: "Get Git SHA"
+      id: GitSHA
       run: |
-        echo "VAR1Value : $VAR1Value"
+          echo "ShortID=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+    - name: "Set Blob Path"
+      id: Artifact
+      run: |
+          echo "ArtifactPath=${{ github.repository }}/${{ inputs.GitBranch }}/vercel/${{ steps.today.outputs.date }}/${{ steps.GitSHA.outputs.ShortID }}" >> $GITHUB_OUTPUT
+
+    #- name: Install Vercel CLI
+    #  run: npm install --global vercel@canary
+
+    - name: Create Env File
+      if: true
+      working-directory: ./src/resideo-persisted-queries-client
+      run: |
+        touch .env
+        echo GRAPHQL_SCHEMA=${{ vars.HF_GRAPHQL_SCHEMA }} >> .env
+        echo GRAPHQL_PERSISTED_QUERIES_APPNAME=${{ vars.HF_GRAPHQL_PERSISTED_QUERIES_APPNAME }} >> .env
+        echo GRAPHQL_PERSISTED_QUERIES_APPVERSION=${{ vars.HF_GRAPHQL_PERSISTED_QUERIES_APPVERSION }} >> .env
+        echo GRAPHQL_PERSISTED_QUERIES_URI=${{ vars.HF_GRAPHQL_PERSISTED_QUERIES_URI }} >> .env
+
+    - name: NPM Install Packages - Resideo GraphQL Schema & Persisted queries client
+      if: true
+      working-directory: ./src/resideo-persisted-queries-client
+      run: npm install
+
+    - name: NPM Install Packages - Resideo Pro Headless frontend
+      if: true
+      working-directory: ./src/rendering      
+      run: npm install
+
+    - name: Echo GraphQl Schema Config Settings
+      if: true
+      working-directory: ./src/resideo-persisted-queries-client
+      run: |
+        npm run echo
+    - name: Copy GraphQL Schema
+      if: true
+      working-directory: ./src/resideo-persisted-queries-client
+      run: npm run copy:schema
+
+    - name: Run Relay Compile
+      if: true
+      working-directory: ./src/rendering
+      run: |
+        npm run relay:version
+        npm run relay
+    - name: Deploy Relay to Quality Persisted Query Server
+      if: true
+      working-directory: ./src/resideo-persisted-queries-client
+      run: npm run relay:deploy
+
+    - name: "Vercel Pull - Preview"
+      if: true
+      working-directory: ./src/rendering
+      run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: "Vercel Build - Preview"
+      if: true
+      working-directory: ./src/rendering
+      run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: "Vercel Deploy - Preview"
+      if: true
+      continue-on-error: true
+      working-directory: ./src/rendering
+      run: |
+          vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
+          vercel alias --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` ${{ secrets.HF_PREVIEW_DOMAIN }} --scope=${{ secrets.VERCEL_ORG_ID }}
+
+    - name: "Print Preview Domain"
+      run: |
+          echo ${{ secrets.PREVIEW_DOMAIN }}
+
+    - name: "Upload Vercel Artifacts"
+      if: ${{ vars.UPLOAD_VERCEL_ARTIFACTS_DEV  == 'true' }}
+      uses: fixpoint/azblob-upload-artifact@v4
+      with:
+        connection-string: ${{ secrets.AZ_STORAGE_CONNECTION }}
+        name: ${{ steps.Artifact.outputs.ArtifactPath }}
+        path: ./src/rendering/src/pages
 
 # Testing Preview site here
 
   task5-approve-deployment:
-    name: "5-Validate Preview Deployment"
+    name: "5-Test Preview Site and Approve Deployment"
     needs: [task4-vercel-preview-deploy]
     if: |
       always() && !failure() 
@@ -227,15 +361,36 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: HotfixNoApproval
+    outputs:
+      CDSwapDone: ${{ steps.CDSwap.outputs.Status }}  
     steps:
-    - name: "User Selection"
-      run: |
-          echo "Environment : ${{ inputs.Environment }}"
 
-    - name: 'VAR1 Value'
-      run: |
-        echo "VAR1Value : $VAR1Value"
+    - name: "Login To Azure"
+      if: true
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.HF_AZURE_AD_SP }}
 
+    - name: 'Swap EU2-CD with Slot'
+      if: true
+      run: |
+          az webapp deployment slot swap --resource-group ${{ secrets.HF_AZ_RG_NAME }} --name ${{ secrets.HF_AZ_CD_APP_NAME }} --slot ${{ secrets.HF_AZ_CD_STAGING_APP_NAME }}
+
+    - name: 'Swap CU-CD with Slot'
+      if: true
+      run: |
+          az webapp deployment slot swap --resource-group ${{ secrets.HF_AZ_RG_NAME_CU }} --name ${{ secrets.HF_AZ_CD_APP_NAME_CU }} --slot ${{ secrets.HF_AZ_CD_STAGING_APP_NAME_CU }}
+          
+    - name: "Stop Staging Slots (EU2, CU)"
+      run: |
+        az webapp stop -g ${{ secrets.HF_AZ_RG_NAME }} -n ${{ secrets.HF_AZ_CD_APP_NAME }} -s ${{ secrets.HF_AZ_CD_STAGING_APP_NAME }}
+        az webapp stop -g ${{ secrets.HF_AZ_RG_NAME_CU }} -n ${{ secrets.HF_AZ_CD_APP_NAME_CU }} -s ${{ secrets.HF_AZ_CD_STAGING_APP_NAME_CU }}
+
+    - name: 'CD Swap Done'
+      if: true
+      id: CDSwap
+      run: |
+        echo "Status=true" >> $GITHUB_OUTPUT
 
   task7-swap-vercel:
     name: "7-Promote Vercel Preview to Production"
@@ -246,12 +401,80 @@ jobs:
     environment:
       name: HotfixNoApproval
     steps:
-    - name: "User Selection"
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.GitBranch }}
+        fetch-depth: 0
+
+    #- name: Install Vercel CLI
+    #  run: npm install --global vercel@canary
+
+    - name: Create Env File
+      if: true
+      working-directory: ./src/resideo-persisted-queries-client
       run: |
-          echo "Environment : ${{ inputs.Environment }}"
-          
+        touch .env
+        echo TEST=Test1 >> .env
+        echo GRAPHQL_SCHEMA=${{ vars.HF_GRAPHQL_SCHEMA }} >> .env
+        echo GRAPHQL_PERSISTED_QUERIES_APPNAME=${{ vars.HF_GRAPHQL_PERSISTED_QUERIES_APPNAME }} >> .env
+        echo GRAPHQL_PERSISTED_QUERIES_APPVERSION=${{ vars.HF_GRAPHQL_PERSISTED_QUERIES_APPVERSION }} >> .env
+        echo GRAPHQL_PERSISTED_QUERIES_URI=${{ vars.HF_GRAPHQL_PERSISTED_QUERIES_URI }} >> .env
+
+    - name: NPM Install Packages - Resideo GraphQL Schema & Persisted queries client
+      if: true
+      working-directory: ./src/resideo-persisted-queries-client
+      run: npm install
+
+    - name: NPM Install Packages - Resideo Pro Headless frontend
+      if: true
+      working-directory: ./src/rendering      
+      run: npm install
+
+    - name: Echo GraphQl Schema Config Settings
+      if: true
+      working-directory: ./src/resideo-persisted-queries-client
+      run: |
+        npm run echo
+    - name: Copy GraphQL Schema
+      if: true
+      working-directory: ./src/resideo-persisted-queries-client
+      run: npm run copy:schema
+
+    - name: Run Relay Compile
+      if: true
+      working-directory: ./src/rendering
+      run: |
+        npm run relay:version
+        npm run relay
+    - name: Deploy Relay to Quality Persisted Query Server
+      if: true
+      working-directory: ./src/resideo-persisted-queries-client
+      run: npm run relay:deploy
+
+    - name: "Vercel Pull"
+      if: true
+      working-directory: ./src/rendering
+      run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: "Vercel Build"
+      if: true
+      working-directory: ./src/rendering
+      run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: "Vercel Deploy"
+      if: true
+      working-directory: ./src/rendering
+      run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: "Disable Vercel Preview Domain"
+      if: true
+      continue-on-error: true
+      working-directory: ./src/rendering
+      run: |
+          vercel alias rm ${{ secrets.HF_PREVIEW_DOMAIN }} --token=${{ secrets.VERCEL_TOKEN }} --scope=${{ secrets.VERCEL_ORG_ID }} --yes
+
   task8-deployment-completed:
-    name: "8-Deployment Successful"
+    name: "8-Deployment Completed"
     needs: [task6-swap-cms, task7-swap-vercel]
     if: |
       always() && !failure()
@@ -259,33 +482,56 @@ jobs:
     environment:
       name: HotfixNoApproval
     steps:
-    - name: "Deployment Successful"
+    - name: "Deployment Completed"
       run: |
-          echo "${{ inputs.Environment }} Deployment Successful"
-
-    - name: 'VAR1 Value'
-      run: |
-        echo "VAR1Value : $VAR1Value"
-
+          echo "${{ inputs.Environment }} Deployment Completed"
           
   task9-rollback-on-error:
     name: "9-Rollback On Error"
-    needs: [task2-cms-deploy, task8-deployment-completed]
+    needs: [task2-cms-deploy, task6-swap-cms, task8-deployment-completed]
     if: ${{ failure() }}
     runs-on: ubuntu-latest
     environment:
       name: HotfixNoApproval
     env:
-      Config: ${{needs.task2-cms-deploy.outputs.Config}}
-      PatchingStatus: ${{needs.task2-cms-deploy.outputs.PatchingStatus}}
-      RestoreStatus: ${{needs.task2-cms-deploy.outputs.RestoreStatus}}
+      CDSetting: ${{needs.task2-cms-deploy.outputs.CDSetting}}
+      CDStagingImage: ${{ needs.task2-cms-deploy.outputs.CDStagingImage }}
+      CMImage: ${{ needs.task2-cms-deploy.outputs.CMImage }}
+      IDImage: ${{ needs.task2-cms-deploy.outputs.IDImage }}
+      NewImageTag: ${{ needs.task2-cms-deploy.outputs.NewImageTag }}
+      
+      CMPatchingDone: ${{needs.task2-cms-deploy.outputs.CMPatchingDone}}
+      CDSwapDone: ${{needs.task6-swap-cms.outputs.CDSwapDone}}
+
     steps:
     - name: "Rollback CM Config"
-      if: ${{ env.PatchingStatus == 'true' }}
+      if: ${{ env.CMPatchingDone == 'true' }} && ${{ env.CDSwapDone != 'true' }}
       run: |
           echo "Rollback $Environment CM Config changes"
-    
+
+    - name: "Deploy To CM with Staging config"
+      if: ${{ env.CMPatchingDone == 'true' }} && ${{ env.CDSwapDone != 'true' }} && ${{ env.CDSetting  == 'Web' }}
+      uses: azure/appservice-settings@v1
+      with:
+        app-name: ${{ secrets.HF_AZ_CM_APP_NAME }}
+        images: ${{ env.CMImageWithTag }}
+        app-settings-json: '${{ secrets.WebConfigs }}'
+
+    - name: "Deploy To CM with Web config"
+      if: ${{ env.CMPatchingDone == 'true' }} && ${{ env.CDSwapDone != 'true' }} && ${{ env.CDSetting  == 'Staging' }}
+      uses: azure/appservice-settings@v1
+      with:
+        app-name: ${{ secrets.HF_AZ_CM_APP_NAME }}
+        images: ${{ env.CMImageWithTag }}
+        app-settings-json: '${{ secrets.StagingConfigs }}'
+        
+    - name: "Stop Staging Slots (EU2, CU)"
+      if: ${{ env.CMPatchingDone == 'true' }} && ${{ env.CDSwapDone != 'true' }}
+      run: |
+        az webapp stop -g ${{ secrets.HF_AZ_RG_NAME }} -n ${{ secrets.HF_AZ_CD_APP_NAME }} -s ${{ secrets.HF_AZ_CD_STAGING_APP_NAME }}
+        az webapp stop -g ${{ secrets.HF_AZ_RG_NAME_CU }} -n ${{ secrets.HF_AZ_CD_APP_NAME_CU }} -s ${{ secrets.HF_AZ_CD_STAGING_APP_NAME_CU }}
+        
     - name: "No Rollback Required"
-      if: ${{ env.PatchingStatus != 'true' }}
+      if: ${{ env.PatchingStatus != 'true' }} || ${{ env.CDSwapDone == 'true' }}
       run: |
           echo "No Rollback Required"
