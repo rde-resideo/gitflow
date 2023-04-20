@@ -89,8 +89,7 @@ jobs:
         echo "::set-output name=CMSolrUrl::$cmSolrUrl"
         
         $allConfigs=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" )
-        #echo "$allConfigs"
-        echo ${{ $allConfigs }}
+        echo "$allConfigs"
         
     - name: 'Read Production CM Config'
       id: Secrets
