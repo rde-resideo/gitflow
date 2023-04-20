@@ -120,7 +120,7 @@ jobs:
       run: |
           echo ${{ needs.deploy-to-cms.outputs.Config }}
 
-	# Testing Preview site here
+# Testing Preview site here
 
   task5-approve-deployment:
     name: "5-Validate Preview Deployment"
@@ -147,6 +147,7 @@ jobs:
     - name: "User Selection"
       run: |
           echo "Environment : ${{ inputs.Environment }}"
+
   task7-swap-vercel:
     name: "7-Promote Vercel Preview to Production"
     needs: [task6-swap-cms]
