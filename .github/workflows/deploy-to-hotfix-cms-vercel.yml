@@ -135,7 +135,7 @@ jobs:
     steps:
     - name: 'Read Production Config'
       run: |
-        echo ${{ fromJSON(needs.deployment-configs.outputs.AllConfigs) }}
+        echo ${{ needs.deployment-configs.outputs.AllConfigs }}
         echo "$Config"
         echo "$CMWebDB"
         echo "$CMWebCUDB"
