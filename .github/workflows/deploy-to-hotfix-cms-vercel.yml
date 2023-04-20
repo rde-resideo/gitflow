@@ -16,16 +16,6 @@ on:
         description: "Git Branch"
         options: 
         - hotfix
-#      DeployToCMS:
-#        description: "Deploy to Sitecore CMS"
-#        type: boolean
-#        default: true
-#        required: true
-#      DeployToVercel:
-#        description: "Deploy to Vercel"
-#        type: boolean
-#        default: true
-#        required: true
 
 env:
   Environment: ${{ inputs.Environment }}
@@ -106,7 +96,7 @@ jobs:
   task3-cms-content-sync:
     name: "3-Sync CMS Content"
     needs: [task2-cms-deploy]
-    if: true # ${{ github.event.inputs.DeployToCMS  == 'true' }}
+    if: true
     runs-on: ubuntu-latest
     environment:
       name: Hotfix
@@ -129,7 +119,8 @@ jobs:
     - name: "Print Current Settings from Job1"
       run: |
           echo ${{ needs.deploy-to-cms.outputs.Config }}
-# Testing Preview site here
+
+	# Testing Preview site here
 
   task5-approve-deployment:
     name: "5-Validate Preview Deployment"
