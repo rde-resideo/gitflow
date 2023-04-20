@@ -70,7 +70,7 @@ jobs:
           echo "Environment : $Environment"
           echo "GitBranch : ${{ inputs.GitBranch }}"
           echo "NEW_IMAGE_TAG2 : $NEW_IMAGE_TAG2"
-          echo ::set-env name=STEPVAR::${{ env.NEW_IMAGE_TAG2 }}-somestep
+          echo ::set-env name=STEPVAR::"${{ env.NEW_IMAGE_TAG2 }}-somestep"
           echo $STEPVAR
 
     - name: 'Read Production Configs'
