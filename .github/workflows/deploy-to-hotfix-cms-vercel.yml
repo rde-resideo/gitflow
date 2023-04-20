@@ -133,7 +133,7 @@ jobs:
       CMWebCUDB: ${{ needs.deployment-configs.outputs.CMWebCUDB }}
       CMSolrUrl: ${{ needs.deployment-configs.outputs.CMSolrUrl }}
       ACRImage: ${{ needs.deployment-configs.outputs.ACRImage }}
-      AllConfigs: ${{ fromJSON(needs.deployment-configs.outputs.AllConfigs) }}
+      AllConfigs: fromJSON(${{ needs.deployment-configs.outputs.AllConfigs}}) 
       VAR1: ${{needs.deployment-configs.outputs.VAR1 }}
       PatchingStatus: ${{needs.deployment-configs.outputs.PatchingStatus}}
       RestoreStatus: ${{needs.deployment-configs.outputs.RestoreStatus}}
