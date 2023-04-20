@@ -49,7 +49,6 @@ jobs:
       CMWebCUDB: ${{ steps.Configs.outputs.CMWebCUDB }}
       CMSolrUrl: ${{ steps.Configs.outputs.CMSolrUrl }}
       ACRImage: ${{ steps.Secrets.outputs.ACRImage }}
-      AllConfigs: ${{ steps.Secrets.outputs.AllConfigs }}
       VAR1: ${{ steps.Secrets.outputs.VAR1 }}
       PatchingStatus: ${{ steps.cmConfigPatching.outputs.Status }}
       RestoreStatus: ${{ steps.cmConfigRestore.outputs.Status }}
@@ -90,8 +89,8 @@ jobs:
         echo "::set-output name=CMSolrUrl::$cmSolrUrl"
         
         $allConfigs=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" )
-        echo "$allConfigs"
-        echo "::set-output name=AllConfigs::toJSON($allConfigs)"
+        #echo "$allConfigs"
+        echo "$allConfigs[1]"
         
     - name: 'Read Production CM Config'
       id: Secrets
