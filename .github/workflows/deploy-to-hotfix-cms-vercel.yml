@@ -57,7 +57,13 @@ jobs:
       name: Hotfix
       url: https://hauthor.prostore.resideo.com
     steps:
-    - name: "User Selection"
+
+    - name: "Login To Azure"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_AD_SP }}
+
+    - name: "Read Production Current State"
       run: |
           echo "Environment : $Environment"
           echo "GitBranch : ${{ inputs.GitBranch }}"
