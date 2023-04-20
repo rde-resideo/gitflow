@@ -81,7 +81,7 @@ jobs:
         $CMWebCUDB=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?contains('Sitecore_ConnectionStrings_WebCU', name)].{Value:value}"  -o tsv)
         echo "::set-output name=CMWebCUDB::$CMWebCUDB"
         
-        $cmSolrUrl=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?contains('Sitecore_ConnectionStrings_Web', name)].{Value:value}"  -o tsv)
+        $cmSolrUrl=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?contains('Sitecore_ConnectionStrings_Solr.Search', name)].{Value:value}"  -o tsv)
         echo "::set-output name=CMSolrUrl::$cmSolrUrl"
         
     - name: 'Read Production CM Config'
@@ -129,7 +129,6 @@ jobs:
       RestoreStatus: ${{needs.deployment-configs.outputs.RestoreStatus}}
     steps:
     - name: 'Read Production Config'
-      id: cdApp
       run: |
         echo "$Config"
         echo "$CMWebDB"
