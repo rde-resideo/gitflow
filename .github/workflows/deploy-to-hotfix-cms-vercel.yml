@@ -63,11 +63,20 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_AD_SP }}
 
+    - name: Azure CLI script
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.30.0
+        inlineScript: |
+          az account show
+
     - name: "Read Production Current State"
       run: |
           echo "Environment : $Environment"
           echo "GitBranch : ${{ inputs.GitBranch }}"
+
     - name: 'Read Production Configs'
+      shell: pwsh
       id: Configs
       run: |
         $configVal=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?contains('CurrentSettings', name)].{Value:value}"  -o tsv)
