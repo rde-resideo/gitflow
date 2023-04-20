@@ -87,10 +87,7 @@ jobs:
         $cmSolrUrl=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?name == 'Sitecore_ConnectionStrings_Solr.Search'].{Value:value}"  -o tsv)
         echo "$cmSolrUrl"
         echo "::set-output name=CMSolrUrl::$cmSolrUrl"
-        
-        $allConfigs=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" )
-        echo ${{ toJSON($allConfigs) }}
-        
+                
     - name: 'Read Production CM Config'
       id: Secrets
       run: |
@@ -131,7 +128,7 @@ jobs:
       CMWebCUDB: ${{ needs.deployment-configs.outputs.CMWebCUDB }}
       CMSolrUrl: ${{ needs.deployment-configs.outputs.CMSolrUrl }}
       ACRImage: ${{ needs.deployment-configs.outputs.ACRImage }}
-      AllConfigs: ${{ needs.deployment-configs.outputs.AllConfigs}}
+      AllConfigs: ${{ needs.deployment-configs.outputs.CMSolrUrl}}
       VAR1: ${{needs.deployment-configs.outputs.VAR1 }}
       PatchingStatus: ${{needs.deployment-configs.outputs.PatchingStatus}}
       RestoreStatus: ${{needs.deployment-configs.outputs.RestoreStatus}}
