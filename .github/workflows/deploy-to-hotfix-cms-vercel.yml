@@ -77,19 +77,23 @@ jobs:
       run: |
         $configVal=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?name == 'CurrentSettings'].{Value:value}"  -o tsv)
         echo "$configVal"
-        echo "::set-output name=Config::$configVal"
+        #echo "::set-output name=Config::$configVal"
+        echo "Config=$configVal" >> $GITHUB_OUTPUT
         
         $cmWeb=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?name == 'Sitecore_ConnectionStrings_Web'].{Value:value}"  -o tsv)
         echo "$cmWeb"
-        echo "::set-output name=CMWebDB::$cmWeb"
+        #echo "::set-output name=CMWebDB::$cmWeb"
+        echo "CMWebDB=$cmWeb" >> $GITHUB_OUTPUT
         
         $CMWebCUDB=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?name == 'Sitecore_ConnectionStrings_WebCU'].{Value:value}"  -o tsv)
         echo "$CMWebCUDB"
-        echo "::set-output name=CMWebCUDB::$CMWebCUDB"
+        #echo "::set-output name=CMWebCUDB::$CMWebCUDB"
+        echo "CMWebCUDB=$CMWebCUDB" >> $GITHUB_OUTPUT
         
         $cmSolrUrl=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?name == 'Sitecore_ConnectionStrings_Solr.Search'].{Value:value}"  -o tsv)
         echo "$cmSolrUrl"
-        echo "::set-output name=CMSolrUrl::$cmSolrUrl"
+        #echo "::set-output name=CMSolrUrl::$cmSolrUrl"
+        echo "CMSolrUrl=$cmSolrUrl" >> $GITHUB_OUTPUT
                 
     - name: 'Read Production CM Config'
       id: Secrets
