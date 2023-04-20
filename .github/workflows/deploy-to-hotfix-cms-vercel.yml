@@ -22,6 +22,7 @@ env:
   GitBranch: ${{ inputs.GitBranch }}
   DeployToCMS: true # ${{ inputs.DeployToCMS }}
   DeployToVercel: true # ${{ inputs.DeployToVercel }}
+  NEW_IMAGE_TAG2: ${{ github.run_id }}
 
   APP_LOCATION: '/' # location of your client code
   GITHUB_CONTEXT: ${{ toJson(github) }}  
@@ -68,6 +69,9 @@ jobs:
       run: |
           echo "Environment : $Environment"
           echo "GitBranch : ${{ inputs.GitBranch }}"
+          echo "NEW_IMAGE_TAG2 : $NEW_IMAGE_TAG2"
+          echo ::set-env name=STEPVAR::${{ env.NEW_IMAGE_TAG2 }}-somestep
+          echo $STEPVAR
 
     - name: 'Read Production Configs'
       shell: pwsh
