@@ -59,11 +59,6 @@ jobs:
       url: https://hauthor.prostore.resideo.com
     steps:
 
-    - name: 'VAR1 Value'
-      run: |
-        echo "${{ 1 != 1 ? 'true' : $VAR1Value }}"
-        echo "${{ 1 != 2 ? 'true' : $VAR1Value }}"
-        
     - name: "Login To Azure"
       uses: azure/login@v1
       with:
