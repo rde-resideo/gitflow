@@ -35,7 +35,7 @@ env:
   NPM_PKG_GITHUB_AUTH_TOKEN: ${{ secrets.NPM_PKG_GITHUB_AUTH_TOKEN }}
   GRAPHQL_PERSISTED_QUERIES_AUTH_TOKEN: ${{ secrets.GRAPHQL_PERSISTED_QUERIES_AUTH_TOKEN }}
   # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  VAR1Value: ${{ vars.VAR1 }}
+  VAR1Value: ${{ vars.hotfixappvar }}
 
 permissions:
     contents: read
