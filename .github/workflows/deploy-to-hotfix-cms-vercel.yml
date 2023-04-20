@@ -40,39 +40,95 @@ permissions:
     contents: read
 
 jobs:
-  task1-print-inputs:
+  deployment-configs:
     name: "1-Print User Selection"
     runs-on: ubuntu-latest
+    outputs:
+      Config: ${{ steps.Configs.outputs.Config }}
+      CMWebDB: ${{ steps.Configs.outputs.CMWebDB }}
+      CMWebCUDB: ${{ steps.Configs.outputs.CMWebCUDB }}
+      CMSolrUrl: ${{ steps.Configs.outputs.CMSolrUrl }}
+      ACRImage: ${{ steps.Secrets.outputs.ACRImage }}
+      VAR1: ${{ steps.Secrets.outputs.VAR1 }}
+      PatchingStatus: ${{ steps.cmConfigPatching.outputs.Status }}
+      RestoreStatus: ${{ steps.cmConfigRestore.outputs.Status }}
+
+    environment:
+      name: Hotfix
+      url: https://hauthor.prostore.resideo.com
     steps:
     - name: "User Selection"
       run: |
           echo "Environment : $Environment"
           echo "GitBranch : ${{ inputs.GitBranch }}"
-          #echo "DeployToCMS : ${{ inputs.DeployToCMS }}"
-          #echo "DeployToVercel : $DeployToVercel"
+    - name: 'Read Production Configs'
+      id: Configs
+      run: |
+        $configVal=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?contains('CurrentSettings', name)].{Value:value}"  -o tsv)
+        echo "::set-output name=Config::$configVal"
+        
+        $cmWeb=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?contains('Sitecore_ConnectionStrings_Web', name)].{Value:value}"  -o tsv)
+        echo "::set-output name=CMWebDB::$cmWeb"
+        
+        $CMWebCUDB=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?contains('Sitecore_ConnectionStrings_WebCU', name)].{Value:value}"  -o tsv)
+        echo "::set-output name=CMWebCUDB::$CMWebCUDB"
+        
+        $cmSolrUrl=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?contains('Sitecore_ConnectionStrings_Web', name)].{Value:value}"  -o tsv)
+        echo "::set-output name=CMSolrUrl::$cmSolrUrl"
+        
+    - name: 'Read Production CM Config'
+      id: Secrets
+      run: |
+        echo "::set-output name=ACR_CD_IMAGE::${{ secrets.ACR_CD_IMAGE }}"
+        echo "::set-output name=VAR1::${{ vars.VAR1 }}"
+        
+    - name: 'CM Config Patching Done'
+      if: true
+      id: cmConfigPatching
+      run: |
+        echo "::set-output name=Status::true"
+        
+    - name: 'CM Config Patching Done'
+      if: true
+      id: cmConfigRestore
+      run: |
+        echo "::set-output name=Status::true"
+    - name: 'Print Production Config'
+      if: false
+      run: |
+        echo ${{ steps.cdApp.outputs.Config }}
+    - name: Job Failed
+      if: ${{ failure() && steps.getProdConfig.conclusion == 'failure' }}
+      run: |
+        echo 'Job Failed'
+
   task2-cms-deploy:
     name: "2-Deploy to CMS (Staging)"   # Image Tagging, Deploy to Staging, CM Config Patching
-    needs: [task1-print-inputs]
+    needs: [deployment-configs]
     if: true # ${{ github.event.inputs.DeployToCMS  == 'true' }}
     permissions:
       contents: read # for actions/checkout to fetch code
       pull-requests: write # for Azure/static-web-apps-deploy to comment on PRs
     runs-on: ubuntu-latest
-    outputs:
-      Config: ${{ steps.cdApp.outputs.Config }}
-      PatchingStatus: ${{ steps.cmConfigPatching.outputs.Status }}
-      RestoreStatus: ${{ steps.cmConfigRestore.outputs.Status }}
-    environment:
-      name: Hotfix
-      url: https://hauthor.prostore.resideo.com
-
+    env:
+      Config: ${{ needs.deployment-configs.outputs.Config }}
+      CMWebDB: ${{ needs.deployment-configs.outputs.CMWebDB }}
+      CMWebCUDB: ${{ needs.deployment-configs.outputs.CMWebCUDB }}
+      CMSolrUrl: ${{ needs.deployment-configs.outputs.CMSolrUrl }}
+      ACRImage: ${{ needs.deployment-configs.outputs.ACRImage }}
+      VAR1: ${{needs.deployment-configs.outputs.VAR1 }}
+      PatchingStatus: ${{needs.deployment-configs.outputs.PatchingStatus}}
+      RestoreStatus: ${{needs.deployment-configs.outputs.RestoreStatus}}
     steps:
     - name: 'Read Production Config'
-      if: true
       id: cdApp
       run: |
-        #$configVal=$(az webapp config appsettings list --name "hotfixapp" --resource-group "hotfix-sc-eu2-svcecomm-rg" --query "[?contains('CurrentSettings', name)].{Value:value}"  -o tsv)
-        echo "::set-output name=Config::'configValWeb'"
+        echo "$Config"
+        echo "$CMWebDB"
+        echo "$CMWebCUDB"
+        echo "$CMSolrUrl"
+        echo "$ACRImage"
+        echo "$VAR1"
         
     - name: 'CM Config Patching Done'
       if: true
@@ -118,7 +174,7 @@ jobs:
     steps:
     - name: "Print Current Settings from Job1"
       run: |
-          echo ${{ needs.deploy-to-cms.outputs.Config }}
+          echo ${{ needs.task2-cms-deploy.outputs.Config }}
 
 # Testing Preview site here
 
@@ -137,7 +193,7 @@ jobs:
 
   task6-swap-cms:
     name: "6-Promote CMS Staging to Production"
-    needs: [task5-approve-deployment]
+    needs: [task2-cms-deploy, task5-approve-deployment]
     if: |
       always() && !failure()
     runs-on: ubuntu-latest
