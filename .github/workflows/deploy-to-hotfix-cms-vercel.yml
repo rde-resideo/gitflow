@@ -35,6 +35,7 @@ env:
   NPM_PKG_GITHUB_AUTH_TOKEN: ${{ secrets.NPM_PKG_GITHUB_AUTH_TOKEN }}
   GRAPHQL_PERSISTED_QUERIES_AUTH_TOKEN: ${{ secrets.GRAPHQL_PERSISTED_QUERIES_AUTH_TOKEN }}
   # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  VAR1Value: ${{ vars.VAR1 }}
 
 permissions:
     contents: read
@@ -58,6 +59,10 @@ jobs:
       url: https://hauthor.prostore.resideo.com
     steps:
 
+    - name: 'VAR1 Value'
+      run: |
+        echo "VAR1Value : $VAR1Value"
+        
     - name: "Login To Azure"
       uses: azure/login@v1
       with:
@@ -142,7 +147,11 @@ jobs:
         echo "$CMSolrUrl"
         echo "$ACRImage"
         echo "$VAR1"
-        
+
+    - name: 'VAR1 Value'
+      run: |
+        echo "VAR1Value : $VAR1Value"
+
     - name: 'CM Config Patching Done'
       if: true
       id: cmConfigPatching
@@ -189,6 +198,10 @@ jobs:
       run: |
           echo ${{ needs.task2-cms-deploy.outputs.Config }}
 
+    - name: 'VAR1 Value'
+      run: |
+        echo "VAR1Value : $VAR1Value"
+
 # Testing Preview site here
 
   task5-approve-deployment:
@@ -217,6 +230,11 @@ jobs:
       run: |
           echo "Environment : ${{ inputs.Environment }}"
 
+    - name: 'VAR1 Value'
+      run: |
+        echo "VAR1Value : $VAR1Value"
+
+
   task7-swap-vercel:
     name: "7-Promote Vercel Preview to Production"
     needs: [task6-swap-cms]
@@ -242,6 +260,11 @@ jobs:
     - name: "Deployment Successful"
       run: |
           echo "${{ inputs.Environment }} Deployment Successful"
+
+    - name: 'VAR1 Value'
+      run: |
+        echo "VAR1Value : $VAR1Value"
+
           
   task9-rollback-on-error:
     name: "9-Rollback On Error"
